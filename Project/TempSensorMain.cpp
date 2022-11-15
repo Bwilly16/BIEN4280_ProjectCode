@@ -8,7 +8,7 @@
 #define SETTEMPERATURE (1UL << 8)
 
 unsigned int readReg = 0xEF;
-unsigned int writeReg = 0xEE;
+unsigned int writeReg = 0xEE; 
 
 Ticker interruptTicker;
 USBSerial test;
