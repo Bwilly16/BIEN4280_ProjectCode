@@ -118,36 +118,36 @@ void read_temperature(){
             }
             if(FARENEIT COMMAND == TRUE){
                 if(CURRENTTEMP >= (SETTEMP + 1)){
-                    greenLED = 0;
-                    blueLED = 0;
-                    redLED = 1;
+                    greenLED = 1;
+                    blueLED = 1;
+                    redLED = 0;
                 }
                 else if(CURRENT TEMP <= (SETTEMP - 1)){
-                    greenLED = 0;
-                    redLED = 0;
-                    blueLED = 1;
+                    greenLED = 1;
+                    redLED = 1;
+                    blueLED = 0;
                 }
                 else if (CURRENTTEMP > (SETTEMP - 1) || CURRENTTEMP < (SETTEMP + 1)){
-                    redLED = 0;
-                    blueLED = 0;
-                    greenLED = 1;
+                    redLED = 1;
+                    blueLED = 1;
+                    greenLED = 0;
                 }
             }
             else if(CELCIUS COMMAND == TRUE){
                  if(CURRENTTEMP >= (SETTEMP + 0.5)){
-                    greenLED = 0;
-                    blueLED = 0;
-                    redLED = 1;
+                    greenLED = 1;
+                    blueLED = 1;
+                    redLED = 0;
                 }
                 else if(CURRENT TEMP <= (SETTEMP - 0.5)){
-                    greenLED = 0;
-                    redLED = 0;
-                    blueLED = 1;
+                    greenLED = 1;
+                    redLED = 1;
+                    blueLED = 0;
                 }
                 else if (CURRENTTEMP > (SETTEMP - 0.5) || CURRENTTEMP < (SETTEMP + 0.5)){
-                    redLED = 0;
-                    blueLED = 0;
-                    greenLED = 1;
+                    redLED = 1;
+                    blueLED = 1;
+                    greenLED = 0;
                 }
             }
             */
@@ -166,6 +166,7 @@ int main() {
 
     redLED = 1; //Turns LED off when first setting bits, causes a short blink
     blueLED = 1;
+    greenLED = 1;
     pullupResistor = 1;
 
     interruptTicker.attach(&setEFlag, 3.0);
