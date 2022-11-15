@@ -25,7 +25,18 @@ int main()
     auto audioConfig = AudioConfig::FromDefaultMicrophoneInput();
     auto recognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
 
-    std::cout << "Speak into your microphone.\n";
+    printf("Speak into your microphone!\n\n\r");
+    printf("-------------------------------\n\n\r");
+    printf("Command 1: Activate Color Sensor\n");
+    printf("Command 2: Add (Color Value)\n");
+    printf("Command 3: Reset Color Value\n");
+    printf("Command 4: Activate Proximity Sensor\n");
+    printf("Command 5: Set Proximity to (Height)\n");
+    printf("Command 6: Activate Temperature Sensor\n");
+    printf("Command 7: Set Temperature to F\n");
+    printf("Command 8: Set Temperature to C\n");
+    printf("Command 9: Set Temperature to (Number)\n");
+
     auto result = recognizer->RecognizeOnceAsync().get();
 
     if (result->Reason == ResultReason::RecognizedSpeech)
@@ -34,7 +45,8 @@ int main()
     }
     else if (result->Reason == ResultReason::NoMatch)
     {
-        std::cout << "NOMATCH: Speech could not be recognized." << std::endl;
+        std::cout << "NOMATCH: Speech could not be recognized. Here is the list of valid commands:" << std::endl;
+        
     }
     else if (result->Reason == ResultReason::Canceled)
     {
