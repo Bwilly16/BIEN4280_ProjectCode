@@ -20,38 +20,34 @@ int main()
 
     auto speechConfig = SpeechConfig::FromSubscription(speechKey, speechRegion);
 
-    // The language of the voice that speaks.
-    speechConfig->SetSpeechSynthesisVoiceName("en-US-JennyNeural");
+    speechConfig->SetSpeechRecognitionLanguage("en-US");
 
-    auto speechSynthesizer = SpeechSynthesizer::FromConfig(speechConfig);
+    auto audioConfig = AudioConfig::FromDefaultMicrophoneInput();
+    auto recognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
 
-    // Get text from the console and synthesize to the default speaker.
-    std::cout << "Enter some text that you want to speak >" << std::endl;
-    std::string text;
-    getline(std::cin, text);
+    std::cout << "Speak into your microphone.\n";
+    auto result = recognizer->RecognizeOnceAsync().get();
 
-    auto result = speechSynthesizer->SpeakTextAsync(text).get();
-
-    // Checks result.
-    if (result->Reason == ResultReason::SynthesizingAudioCompleted)
+    if (result->Reason == ResultReason::RecognizedSpeech)
     {
-        std::cout << "Speech synthesized to speaker for text [" << text << "]" << std::endl;
+        std::cout << "RECOGNIZED: Text=" << result->Text << std::endl;
+    }
+    else if (result->Reason == ResultReason::NoMatch)
+    {
+        std::cout << "NOMATCH: Speech could not be recognized." << std::endl;
     }
     else if (result->Reason == ResultReason::Canceled)
     {
-        auto cancellation = SpeechSynthesisCancellationDetails::FromResult(result);
+        auto cancellation = CancellationDetails::FromResult(result);
         std::cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
 
         if (cancellation->Reason == CancellationReason::Error)
         {
             std::cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
-            std::cout << "CANCELED: ErrorDetails=[" << cancellation->ErrorDetails << "]" << std::endl;
+            std::cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
             std::cout << "CANCELED: Did you set the speech resource key and region values?" << std::endl;
         }
     }
-
-    std::cout << "Press enter to exit..." << std::endl;
-    std::cin.get();
 }
 
 std::string GetEnvironmentVariable(const char* name)
