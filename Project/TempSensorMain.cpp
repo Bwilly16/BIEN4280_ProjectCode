@@ -1,7 +1,6 @@
 #include "mbed.h"
 #include "USBSerial.h"
 #include <I2C.h>
-#include <ECahill_binaryutils.h>
 
 #define LEDDIR (uint32_t*) 0x50000514 
 //#define SETPRESSURE (1UL << 4)
@@ -162,8 +161,8 @@ void setEFlag(){ //Send event flag to read_temperature
 
 int main() {
     thread.start(read_temperature);
-    setbit(LEDDIR, 6); 
-    setbit(LEDDIR, 24);
+	*LEDDIR = *LEDDIR | (1 << 6);
+    *LEDDIR = *LEDDIR | (1 << 24);
 
     redLED = 1; //Turns LED off when first setting bits, causes a short blink
     blueLED = 1;
