@@ -1,7 +1,6 @@
 #include "mbed.h"
 #include "USBSerial.h"
 #include <I2C.h>
-#include <ECahill_binaryutils.h>
 
 #define LEDDIR (uint32_t*) 0x50000514 
 //#define SETPRESSURE (1UL << 4)
@@ -119,36 +118,36 @@ void read_temperature(){
             }
             if(FARENEIT COMMAND == TRUE){
                 if(CURRENTTEMP >= (SETTEMP + 1)){
-                    greenLED = 0;
-                    blueLED = 0;
-                    redLED = 1;
+                    greenLED = 1;
+                    blueLED = 1;
+                    redLED = 0;
                 }
                 else if(CURRENT TEMP <= (SETTEMP - 1)){
-                    greenLED = 0;
-                    redLED = 0;
-                    blueLED = 1;
+                    greenLED = 1;
+                    redLED = 1;
+                    blueLED = 0;
                 }
                 else if (CURRENTTEMP > (SETTEMP - 1) || CURRENTTEMP < (SETTEMP + 1)){
-                    redLED = 0;
-                    blueLED = 0;
-                    greenLED = 1;
+                    redLED = 1;
+                    blueLED = 1;
+                    greenLED = 0;
                 }
             }
             else if(CELCIUS COMMAND == TRUE){
                  if(CURRENTTEMP >= (SETTEMP + 0.5)){
-                    greenLED = 0;
-                    blueLED = 0;
-                    redLED = 1;
+                    greenLED = 1;
+                    blueLED = 1;
+                    redLED = 0;
                 }
                 else if(CURRENT TEMP <= (SETTEMP - 0.5)){
-                    greenLED = 0;
-                    redLED = 0;
-                    blueLED = 1;
+                    greenLED = 1;
+                    redLED = 1;
+                    blueLED = 0;
                 }
                 else if (CURRENTTEMP > (SETTEMP - 0.5) || CURRENTTEMP < (SETTEMP + 0.5)){
-                    redLED = 0;
-                    blueLED = 0;
-                    greenLED = 1;
+                    redLED = 1;
+                    blueLED = 1;
+                    greenLED = 0;
                 }
             }
             */
@@ -162,11 +161,12 @@ void setEFlag(){ //Send event flag to read_temperature
 
 int main() {
     thread.start(read_temperature);
-    setbit(LEDDIR, 6); 
-    setbit(LEDDIR, 24);
+	*LEDDIR = *LEDDIR | (1 << 6);
+    *LEDDIR = *LEDDIR | (1 << 24);
 
     redLED = 1; //Turns LED off when first setting bits, causes a short blink
     blueLED = 1;
+    greenLED = 1;
     pullupResistor = 1;
 
     interruptTicker.attach(&setEFlag, 3.0);
