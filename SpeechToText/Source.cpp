@@ -1,3 +1,4 @@
+
 #include <iostream> 
 #include <stdlib.h>
 #include <speechapi_cxx.h>
@@ -71,3 +72,4 @@ std::string GetEnvironmentVariable(const char* name)
     return value ? value : "";
 #endif
 }
+
