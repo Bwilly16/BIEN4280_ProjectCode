@@ -34,8 +34,8 @@ int main()
     printf("Command 4: Activate Proximity Sensor\n");
     printf("Command 5: Set Proximity to (Height)\n");
     printf("Command 6: Activate Temperature Sensor\n");
-    printf("Command 7: Whats the temperature in Celcius\n");
-    printf("Command 8: Whats the temperature in Farinheit\n");
+    printf("Command 7: What's the temperature in Celcius\n");
+    printf("Command 8: What's the temperature in Farinheit\n");
     printf("Command 9: Set Temperature to (Number)\n");
 
     auto result = recognizer->RecognizeOnceAsync().get();
