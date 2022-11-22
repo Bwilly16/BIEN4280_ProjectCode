@@ -3,7 +3,6 @@
 #include <I2C.h>
 
 #define LEDDIR (uint32_t*) 0x50000514 
-//#define SETPRESSURE (1UL << 4)
 #define SETTEMPERATURE (1UL << 8)
 
 unsigned int readReg = 0xEF;
@@ -27,6 +26,8 @@ void read_temperature(){
     uint16_t MSB, LSB;
     int i = 0;
 
+    //string command;
+    //scanf("%s", command);
     //setT = PLACEHOLDER FOR COMMAND ENTERED; //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     temperatureData[0] = 0xD0;
@@ -36,6 +37,7 @@ void read_temperature(){
     test.printf("1: Array[0] = %i \r\n\r\n", temperatureData[0]);
 
     if(temperatureData[0] == 85){
+
         //AC5
         temperatureData[0] = 0xB2;
         i2c.write(writeReg, temperatureData, 1, true);
@@ -108,9 +110,13 @@ void read_temperature(){
             currentT = (B5 + 8)/16;
             currentT = currentT/10;
 
+            setT = 40; //FOR TESTING ONLY
+
             test.printf("Reading temperature: %i degrees C\r\n\r\n", currentT);
 
             /* //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            scanf("%s", command);
+            
             if(FARENHEIT COMMAND == TRUE){ 
                 T = (1.8 * T) + 32;
                 test.printf("Reading temperature: %i degrees F\r\n\r\n", T);
@@ -135,8 +141,8 @@ void read_temperature(){
                     greenLED = 0;
                 }
             }
-            else if(CELCIUS COMMAND == TRUE){
-                 if(currentT >= (setT + 0.5)){
+            else if(CELCIUS COMMAND == TRUE){*/
+                if(currentT >= (setT + 0.5)){
                     greenLED = 1;
                     blueLED = 1;
                     redLED = 0;
@@ -150,7 +156,7 @@ void read_temperature(){
                     redLED = 1;
                     blueLED = 1;
                     greenLED = 0;
-                }
+                }/*
             }
             */
         }
