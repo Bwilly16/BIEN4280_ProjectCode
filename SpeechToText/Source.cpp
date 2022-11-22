@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <speechapi_cxx.h>
 
+
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 
@@ -33,15 +34,15 @@ int main()
     printf("Command 4: Activate Proximity Sensor\n");
     printf("Command 5: Set Proximity to (Height)\n");
     printf("Command 6: Activate Temperature Sensor\n");
-    printf("Command 7: Set Temperature to F\n");
-    printf("Command 8: Set Temperature to C\n");
+    printf("Command 7: Whats the temperature in Celcius\n");
+    printf("Command 8: Whats the temperature in Farinheit\n");
     printf("Command 9: Set Temperature to (Number)\n");
 
     auto result = recognizer->RecognizeOnceAsync().get();
 
     if (result->Reason == ResultReason::RecognizedSpeech)
     {
-        std::cout << "RECOGNIZED: Text=" << result->Text << std::endl;
+        std::cout << "\n\rRECOGNIZED: Text=" << result->Text << std::endl;
     }
     else if (result->Reason == ResultReason::NoMatch)
     {
@@ -61,6 +62,7 @@ int main()
         }
     }
 }
+
 
 std::string GetEnvironmentVariable(const char* name)
 {
