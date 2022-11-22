@@ -108,7 +108,7 @@ void read_temperature(){
             currentT = (B5 + 8)/16;
             currentT = currentT/10;
 
-            test.printf("Reading temperature: %i degrees F\r\n\r\n", currentT);
+            test.printf("Reading temperature: %i degrees C\r\n\r\n", currentT);
 
             /* //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             if(FARENHEIT COMMAND == TRUE){ 
@@ -119,34 +119,34 @@ void read_temperature(){
                 test.printf("Reading temperature: %i degrees C\r\n\r\n", T);
             }
             if(FARENEIT COMMAND == TRUE){
-                if(CURRENTTEMP >= (SETTEMP + 1)){
+                if(currentT >= (setT + 1)){
                     greenLED = 1;
                     blueLED = 1;
                     redLED = 0;
                 }
-                else if(CURRENT TEMP <= (SETTEMP - 1)){
+                else if(currentT <= (setT - 1)){
                     greenLED = 1;
                     redLED = 1;
                     blueLED = 0;
                 }
-                else if (CURRENTTEMP > (SETTEMP - 1) || CURRENTTEMP < (SETTEMP + 1)){
+                else if (currentT > (setT - 1) || currentT < (setT + 1)){
                     redLED = 1;
                     blueLED = 1;
                     greenLED = 0;
                 }
             }
             else if(CELCIUS COMMAND == TRUE){
-                 if(CURRENTTEMP >= (SETTEMP + 0.5)){
+                 if(currentT >= (setT + 0.5)){
                     greenLED = 1;
                     blueLED = 1;
                     redLED = 0;
                 }
-                else if(CURRENT TEMP <= (SETTEMP - 0.5)){
+                else if(currentT <= (setT - 0.5)){
                     greenLED = 1;
                     redLED = 1;
                     blueLED = 0;
                 }
-                else if (CURRENTTEMP > (SETTEMP - 0.5) || CURRENTTEMP < (SETTEMP + 0.5)){
+                else if (currentT > (setT - 0.5) || currentT < (setT + 0.5)){
                     redLED = 1;
                     blueLED = 1;
                     greenLED = 0;
