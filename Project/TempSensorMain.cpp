@@ -108,6 +108,8 @@ void read_temperature(){
             currentT = (B5 + 8)/16;
             currentT = currentT/10;
 
+            test.printf("Reading temperature: %i degrees F\r\n\r\n", currentT);
+
             /* //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             if(FARENHEIT COMMAND == TRUE){ 
                 T = (1.8 * T) + 32;
