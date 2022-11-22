@@ -4,6 +4,9 @@
 #include <speechapi_cxx.h>
 #include <windows.h>
 #include <tchar.h>
+#include <cstring>
+#include <WinBase.h>
+#include <strsafe.h>
 
 
 using namespace Microsoft::CognitiveServices::Speech;
@@ -11,25 +14,12 @@ using namespace Microsoft::CognitiveServices::Speech::Audio;
 
 std::string GetEnvironmentVariable(const char* name);
 HANDLE hComm;
-//typedef const wchar_t* gszPort = ("COM9");
-TCHAR* pcCommPort = TEXT("COM9");
+char DataBuffer[];
+DWORD dwBytesToWrite = (DWORD)strlen(DataBuffer);
+DWORD dwBytesWritten = 0;
+BOOL bErrorFlag = FALSE;
 
-void PrintCommState(DCB dcb)
-{
-    //  Print some of the DCB structure values
-    _tprintf(TEXT("\nBaudRate = %d, ByteSize = %d, Parity = %d, StopBits = %d\n"),
-        dcb.BaudRate,
-        dcb.ByteSize,
-        dcb.Parity,
-        dcb.StopBits);
-}
-
-
-void SerialComs() {
-    hComm = CreateFile(pcCommPort, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
-    if (hComm == INVALID_HANDLE_VALUE)
-        // error opening port; abort
-}
+void DisplayError(LPTSTR lpszFunction);
 
 int main()
 {
@@ -70,7 +60,7 @@ int main()
     else if (result->Reason == ResultReason::NoMatch)
     {
         std::cout << "NOMATCH: Speech could not be recognized. Here is the list of valid commands:" << std::endl;
-        
+
     }
     else if (result->Reason == ResultReason::Canceled)
     {
@@ -84,9 +74,65 @@ int main()
             std::cout << "CANCELED: Did you set the speech resource key and region values?" << std::endl;
         }
     }
-    
-}
 
+    //set up communications 
+    hComm = CreateFileA("COM10", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
+    if (hComm == INVALID_HANDLE_VALUE)
+    {
+        DisplayError(TEXT("CreateFile"));
+        _tprintf(TEXT("Terminal failure: Unable to open file \"%s\" for write.\n"), argv[1]);
+        return;
+    }
+    std::cout << "Finished setting up communications" << std::endl;
+
+    bErrorFlag = WriteFile(
+        hComm,           // open file handle
+        DataBuffer,       // start of data to write
+        dwBytesToWrite,  // number of bytes to write
+        &dwBytesWritten, // number of bytes that were written
+        NULL);
+}
+void DisplayError(LPTSTR lpszFunction)
+// Routine Description:
+// Retrieve and output the system error message for the last-error code
+{
+    LPVOID lpMsgBuf;
+    LPVOID lpDisplayBuf;
+    DWORD dw = GetLastError();
+
+    FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER |
+        FORMAT_MESSAGE_FROM_SYSTEM |
+        FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL,
+        dw,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPTSTR)&lpMsgBuf,
+        0,
+        NULL);
+
+    lpDisplayBuf =
+        (LPVOID)LocalAlloc(LMEM_ZEROINIT,
+            (lstrlen((LPCTSTR)lpMsgBuf)
+                + lstrlen((LPCTSTR)lpszFunction)
+                + 40) // account for format string
+            * sizeof(TCHAR));
+
+    if (FAILED(StringCchPrintf((LPTSTR)lpDisplayBuf,
+        LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+        TEXT("%s failed with error code %d as follows:\n%s"),
+        lpszFunction,
+        dw,
+        lpMsgBuf)))
+    {
+        printf("FATAL ERROR: Unable to output error code.\n");
+    }
+
+    _tprintf(TEXT("ERROR: %s\n"), (LPCTSTR)lpDisplayBuf);
+
+    LocalFree(lpMsgBuf);
+    LocalFree(lpDisplayBuf);
+}
 
 std::string GetEnvironmentVariable(const char* name)
 {
