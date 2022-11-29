@@ -5,25 +5,32 @@
 #define LEDDIR (uint32_t*) 0x50000514 
 #define SETTEMPERATURE (1UL << 8)
 #define SETPROXIMITY (1UL << 8)
+#define SETCOLOR (1UL << 8)
 
-unsigned int readReg = 0xEF;
+unsigned int readReg = 0xEF; //Read and write registers for temperature sensor
 unsigned int writeReg = 0xEE; 
 
 unsigned int readRegProx = (0x39<<1) + 1; //Read and write registers for proximity sensor
 unsigned int writeRegProx = 0x39<<1;
+
+const int writeaddr = ((0x39 << 1) + 0); //write for board 0x72 //doesnt work
+const int readaddr =  ((0x39 << 1) + 1); //read for board 0x73 //works
 
 Ticker interruptTicker;
 USBSerial test;
 Thread thread, thread1, thread2;
 EventFlags PTEvent;
 I2C i2c(p31, p2); //(SDA, SCL)
+I2C colors(I2C_SDA1, I2C_SCL1); //p0.14, p0.15
 DigitalOut port22(p22);
 DigitalOut pullupResistor(p32); //Pin 32 = P1_0
 DigitalOut redLED(LED2);
 DigitalOut blueLED(LED4);
 DigitalOut greenLED(LED3);
+DigitalOut SetHigh(P1_0); //P1.0
 
 void read_temperature(){
+    int waitTemp = PTEvent.wait_any(SETTEMPERATURE); //Wait for event flag
     char temperatureData[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //char == uint8
     unsigned short AC5, AC6; //Initializing constants and variables
     short MC, MD;
@@ -39,10 +46,9 @@ void read_temperature(){
     i2c.write(writeReg, temperatureData, 1, true); //Send 0xD0 = 208
     i2c.read(readReg, temperatureData, 1); //Expect a 0x55 = 85 back
 
-    test.printf("1: Array[0] = %i \r\n\r\n", temperatureData[0]);
+    //test.printf("1: Array[0] = %i \r\n\r\n", temperatureData[0]); //Check for signal from sensor
 
     if(temperatureData[0] == 85){
-
         //AC5
         temperatureData[0] = 0xB2;
         i2c.write(writeReg, temperatureData, 1, true);
@@ -88,8 +94,6 @@ void read_temperature(){
         MD = ((MSB<<8)|LSB);
 
         while(true){
-            int waitTemp = PTEvent.wait_any(SETTEMPERATURE); //Wait for event flag
-        
             temperatureData[0] = 0xF4;
             temperatureData[1] = 0x2E;
             i2c.write(writeReg, (const char *)temperatureData, 2); //Send 0xF4 = 244 and 0x2E = 46 to start temperature reading
@@ -130,34 +134,34 @@ void read_temperature(){
                 test.printf("Reading temperature: %i degrees C\r\n\r\n", T);
             }
             if(FARENEIT COMMAND == TRUE){
-                if(currentT >= (setT + 1)){
+                if(currentT >= (setT + 1)){ //If detected temp is higher than set temp, LED = red
                     greenLED = 1;
                     blueLED = 1;
                     redLED = 0;
                 }
-                else if(currentT <= (setT - 1)){
+                else if(currentT <= (setT - 1)){ //If detected temp is lower than set temp, LED = blue
                     greenLED = 1;
                     redLED = 1;
                     blueLED = 0;
                 }
-                else if (currentT > (setT - 1) || currentT < (setT + 1)){
+                else if (currentT > (setT - 1) || currentT < (setT + 1)){ //If detected temp is set temp, LED = green
                     redLED = 1;
                     blueLED = 1;
                     greenLED = 0;
                 }
             }
             else if(CELCIUS COMMAND == TRUE){*/
-                if(currentT >= (setT + 0.5)){
+                if(currentT >= (setT + 0.5)){ //If detected temp is higher than set temp, LED = red
                     greenLED = 1;
                     blueLED = 1;
                     redLED = 0;
                 }
-                else if(currentT <= (setT - 0.5)){
+                else if(currentT <= (setT - 0.5)){ //If detected temp is lower than set temp, LED = blue
                     greenLED = 1;
                     redLED = 1;
                     blueLED = 0;
                 }
-                else if (currentT > (setT - 0.5) || currentT < (setT + 0.5)){
+                else if (currentT > (setT - 0.5) || currentT < (setT + 0.5)){ //If detected temp is set temp, LED = green
                     redLED = 1;
                     blueLED = 1;
                     greenLED = 0;
@@ -169,14 +173,15 @@ void read_temperature(){
 }
 
 void proximity_sensor(){
+    int waitTemp = PTEvent.wait_any(SETPROXIMITY); //Wait for event flag, MIGHT need to be before while loop
     char Data[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //char == uint8
     int i = 0;
-    long setProx = 0;
+    long setProx = 0; //Set to result from speech to text
 
     //setProx = result; //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-    test.printf("readReg: %i\r\n", readRegProx);
-    test.printf("writeReg: %i\r\n\r\n", writeRegProx);
+    //string command;
+    //scanf("%s", command);
+    //setT = PLACEHOLDER FOR COMMAND ENTERED; //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     thread_sleep_for(10);
 
@@ -184,7 +189,7 @@ void proximity_sensor(){
     i2c.write(writeRegProx, Data, 1, true); //Check ID
     i2c.read(readRegProx, Data, 1); //Expect a 0xAB = 171 back
 
-    //test.printf("The sensor ID is: %d\r\n\r\n", Data[0]);
+    //test.printf("The sensor ID is: %d\r\n\r\n", Data[0]); //Check for connection
 
     if(Data[0] == 171){
             Data[0] = 0x90; //Increasing distance
@@ -202,7 +207,7 @@ void proximity_sensor(){
             Data[1] = 0x25;
             i2c.write(writeRegProx, (const char *)Data, 2);
 
-            thread_sleep_for(15);
+            thread_sleep_for(15); //Additional buffer time
 
             Data[0] = 0x9C; //Read data obtained
             i2c.write(writeRegProx, (const char *)Data, 1, true);
@@ -210,17 +215,141 @@ void proximity_sensor(){
 
             //test.printf("PDATA is: %d\r\n", Data[i]); //Data from chip
 
-            if((Data[0] < (setProx + 1)) && (Data[0] > (setProx - 1))) { //Estimated calibrations
+            if((Data[0] < (setProx + 1)) && (Data[0] > (setProx - 1))) { //Print if detected distance is close to set distance
                 test.printf("%i cm reached\r\n", setProx);
             }
         }
     }
 }
 
-void color_sensor(){
-    
-    while(true){
+void color_sensor() {
+    int waitTemp = PTEvent.wait_any(SETCOLOR); //Wait for event flag, MIGHT need to be before while loop
+    uint8_t data[2];
+    char hold[1];
+    char test1, test2;
+    uint16_t Red = 0, Blue = 0, Green = 0, Clear = 0;
+    uint16_t MSB = 0, LSB = 0, RedCombo = 0, GreenCombo = 0, BlueCombo = 0, ClearCombo = 0;
+    int redInt, greenInt, blueInt;
+    long redHex = 0, greenHex = 0, blueHex = 0;
+    long remainder;
+    int i = 0, j = 0;
+    char redhexnum[100] = {0}, greenhexnum[100] = {0}, bluehexnum[100] = {0};
 
+    hold[0] = 0x00;
+    data[0] = 0x92; //address of the ID register, output says 0xA8
+
+    thread_sleep_for(1000);
+
+    test1 = colors.write(writeaddr, (const char*) data, 1, true);
+    test2 = colors.read(readaddr, hold, 1);
+
+    //MyMessage.printf("Is the output 0xA8? %d\n\r", hold[0]); //A8 = 168, AB = 171
+
+    //Turning on the sensor
+    data[0] = 0x80; //write to this address
+    data[1] = 0x13; //what is being written to address
+    colors.write(writeaddr, (const char*) data, 2, true);
+
+    while(true) {        
+        //string command;
+        //scanf("%s", command);
+        //setT = PLACEHOLDER FOR COMMAND ENTERED; //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+        //WAIT FOR COMMAND FROM USER TO ENTER RED VALUE
+        //Reading red lower and upper bit
+        thread_sleep_for(100);
+        data[0] = 0x96;
+        test1 = colors.write(writeaddr, (const char*) data, 1, true);
+        test2 = colors.read(readaddr, hold, 1, false);
+        MSB = hold[0];
+        data[0] = 0x97;
+        colors.write(writeaddr, (const char*) data, 1, true);
+        colors.read(readaddr, hold, 1, false);
+        LSB = hold[0];
+
+        RedCombo = ((MSB<<8)|LSB);
+        redInt = RedCombo/4;
+
+        j = 0;
+        while(redInt != 0) { //TEST, REDINT MAY NEED TO BE A LONG INSTEAD OF AN INT
+            remainder = redInt % 16;
+            if (remainder < 10)
+                redhexnum[j++] = 48 + remainder;
+            else
+                redhexnum[j++] = 55 + remainder;
+            redInt = redInt / 16;
+        }
+
+        //MyMessage.printf("Red Ouptut: %d\n\r", RedCombo);
+
+        //WAIT FOR COMMAND FROM USER TO ENTER GREEN VALUE
+        //Reading Green lower and upper bit
+        thread_sleep_for(100);
+        data[0] = 0x98;
+        colors.write(writeaddr, (const char*) data, 1, true);
+        colors.read(readaddr, hold, 1, false);
+        MSB = hold[0];
+        data[0] = 0x99;
+        colors.write(writeaddr, (const char*) data, 1, true);
+        colors.read(readaddr, hold, 1, false);
+        LSB = hold[0];
+
+        GreenCombo = ((MSB<<8)|LSB);
+        greenInt = GreenCombo/4;
+
+        j = 0;
+        while(greenInt != 0) { //TEST, REDINT MAY NEED TO BE A LONG INSTEAD OF AN INT
+            remainder = greenInt % 16;
+            if (remainder < 10)
+                greenhexnum[j++] = 48 + remainder;
+            else
+                greenhexnum[j++] = 55 + remainder;
+            greenInt = redInt / 16;
+        }
+
+        //MyMessage.printf("Green Ouptut: %d\n\r", GreenCombo);
+
+        //WAIT FOR COMMAND FROM USER TO ENTER BLUE VALUE
+        //Reading Blue lower and upper bit
+        thread_sleep_for(100);
+        data[0] = 0x9A;
+        colors.write(writeaddr, (const char*) data, 1, true);
+        colors.read(readaddr, hold, 1, false);
+        MSB = hold[0];
+        data[0] = 0x9B;
+        colors.write(writeaddr, (const char*) data, 1, true);
+        colors.read(readaddr, hold, 1, false);
+        LSB = hold[0];
+
+        BlueCombo = ((MSB<<8)|LSB);
+        blueHex = BlueCombo/4;
+
+        j = 0;
+        while(blueInt != 0) { //TEST, REDINT MAY NEED TO BE A LONG INSTEAD OF AN INT
+            remainder = blueInt % 16;
+            if (remainder < 10)
+                bluehexnum[j++] = 48 + remainder;
+            else
+                bluehexnum[j++] = 55 + remainder;
+            blueInt = blueInt / 16;
+        }
+        //MyMessage.printf("Blue Ouptut: %d\n\r", BlueCombo);
+
+        //Reading clear lower and upper bit
+        thread_sleep_for(100);
+        data[0] = 0x94;
+        colors.write(writeaddr, (const char*) data, 1, true);
+        colors.read(readaddr, hold, 1, false);
+        MSB = hold[0];
+        data[0] = 0x95;
+        colors.write(writeaddr, (const char*) data, 1, true);
+        colors.read(readaddr, hold, 1, false);
+        LSB = hold[0];
+
+        ClearCombo = ((MSB<<8)|LSB); //1024 Maximum
+
+        for (i = j; i >= 0; i--) //If values are different lengths, may be an issue
+            test.printf("Detected hex value: #%i%i%i\r\n", redhexnum[i], greenhexnum[i], bluehexnum[i]);
     }
 }
 
@@ -229,19 +358,23 @@ void setEFlag(){ //Send event flag to read_temperature
         PTEvent.set(SETTEMPERATURE);
     //}
     //else if(result == 'Activate proximity sensor'){
-        PTEvent.set(SETPROXIMITY);
-    //}
-    //else if(result == 'Activate color sensor'){
-    // PTEvent.set(SETCOLOR);
-    //}
+    /*    PTEvent.set(SETPROXIMITY);
+    }
+    else if(result == 'Activate color sensor'){
+     PTEvent.set(SETCOLOR);
+    }
+    else if(result == null){
+        thread_sleep_for(1);
+    }
     //else(){
         test.printf("Please activate a valid sensor\r\n\n");
         test.printf("VALID COMMANDS:\r\n");
-        test.printf("'Activate temperature sensor'\r\n'Activate proximity sensor'\r\n'Activate color sensor'");
-    //}
+        test.printf("'Activate temperature sensor'\r\n'Activate proximity sensor'\r\n'Activate color sensor'\r\n");
+    //}*/
 }
 
 int main() {
+    test.printf("Got into Mbed\r\n");
     thread.start(read_temperature);
     thread1.start(proximity_sensor);
     thread2.start(color_sensor);
@@ -252,17 +385,11 @@ int main() {
     redLED = 1; //Turns LED off when first setting bits, causes a short blink
     blueLED = 1;
     greenLED = 1;
+
     pullupResistor = 1;
     port22 = 1;
 
-    interruptTicker.attach(&setEFlag, 1.0);
-	
- /* Color Sensor(needed after, not yet)   
-    SetHigh = 1;
-    SetHigh1 = 1;
-    thread3.start(BlinkLED);
-    thread1.start(colorimetry);
-*/
+    interruptTicker.attach(&setEFlag, 1.0); //Check for command every 1 second, may need to slow down
 
     while (true) {
         thread_sleep_for(1000);
