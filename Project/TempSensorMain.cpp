@@ -30,6 +30,7 @@ DigitalOut greenLED(LED3);
 DigitalOut SetHigh(P1_0); //P1.0
 
 void read_temperature(){
+    int waitTemp = PTEvent.wait_any(SETTEMPERATURE); //Wait for event flag
     char temperatureData[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //char == uint8
     unsigned short AC5, AC6; //Initializing constants and variables
     short MC, MD;
@@ -93,8 +94,6 @@ void read_temperature(){
         MD = ((MSB<<8)|LSB);
 
         while(true){
-            int waitTemp = PTEvent.wait_any(SETTEMPERATURE); //Wait for event flag
-        
             temperatureData[0] = 0xF4;
             temperatureData[1] = 0x2E;
             i2c.write(writeReg, (const char *)temperatureData, 2); //Send 0xF4 = 244 and 0x2E = 46 to start temperature reading
@@ -174,11 +173,15 @@ void read_temperature(){
 }
 
 void proximity_sensor(){
+    int waitTemp = PTEvent.wait_any(SETPROXIMITY); //Wait for event flag, MIGHT need to be before while loop
     char Data[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //char == uint8
     int i = 0;
     long setProx = 0; //Set to result from speech to text
 
     //setProx = result; //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //string command;
+    //scanf("%s", command);
+    //setT = PLACEHOLDER FOR COMMAND ENTERED; //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     thread_sleep_for(10);
 
@@ -198,7 +201,6 @@ void proximity_sensor(){
             i2c.write(writeRegProx, (const char *)Data, 2);
 
         while(true){
-            int waitTemp = PTEvent.wait_any(SETPROXIMITY); //Wait for event flag, MIGHT need to be before while loop
             thread_sleep_for(50); //5 millisecond buffer
 
             Data[0] = 0x80; //Send start signal
@@ -221,11 +223,17 @@ void proximity_sensor(){
 }
 
 void color_sensor() {
+    int waitTemp = PTEvent.wait_any(SETCOLOR); //Wait for event flag, MIGHT need to be before while loop
     uint8_t data[2];
     char hold[1];
     char test1, test2;
     uint16_t Red = 0, Blue = 0, Green = 0, Clear = 0;
     uint16_t MSB = 0, LSB = 0, RedCombo = 0, GreenCombo = 0, BlueCombo = 0, ClearCombo = 0;
+    int redInt, greenInt, blueInt;
+    long redHex = 0, greenHex = 0, blueHex = 0;
+    long remainder;
+    int i = 0, j = 0;
+    char redhexnum[100] = {0}, greenhexnum[100] = {0}, bluehexnum[100] = {0};
 
     hold[0] = 0x00;
     data[0] = 0x92; //address of the ID register, output says 0xA8
@@ -242,9 +250,12 @@ void color_sensor() {
     data[1] = 0x13; //what is being written to address
     colors.write(writeaddr, (const char*) data, 2, true);
 
-    while(true) {
-        int waitTemp = PTEvent.wait_any(SETCOLOR); //Wait for event flag, MIGHT need to be before while loop
-        
+    while(true) {        
+        //string command;
+        //scanf("%s", command);
+        //setT = PLACEHOLDER FOR COMMAND ENTERED; //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+        //WAIT FOR COMMAND FROM USER TO ENTER RED VALUE
         //Reading red lower and upper bit
         thread_sleep_for(100);
         data[0] = 0x96;
@@ -257,8 +268,21 @@ void color_sensor() {
         LSB = hold[0];
 
         RedCombo = ((MSB<<8)|LSB);
+        redInt = RedCombo/4;
+
+        j = 0;
+        while(redInt != 0) { //TEST, REDINT MAY NEED TO BE A LONG INSTEAD OF AN INT
+            remainder = redInt % 16;
+            if (remainder < 10)
+                redhexnum[j++] = 48 + remainder;
+            else
+                redhexnum[j++] = 55 + remainder;
+            redInt = redInt / 16;
+        }
+
         //MyMessage.printf("Red Ouptut: %d\n\r", RedCombo);
 
+        //WAIT FOR COMMAND FROM USER TO ENTER GREEN VALUE
         //Reading Green lower and upper bit
         thread_sleep_for(100);
         data[0] = 0x98;
@@ -271,8 +295,21 @@ void color_sensor() {
         LSB = hold[0];
 
         GreenCombo = ((MSB<<8)|LSB);
+        greenInt = GreenCombo/4;
+
+        j = 0;
+        while(greenInt != 0) { //TEST, REDINT MAY NEED TO BE A LONG INSTEAD OF AN INT
+            remainder = greenInt % 16;
+            if (remainder < 10)
+                greenhexnum[j++] = 48 + remainder;
+            else
+                greenhexnum[j++] = 55 + remainder;
+            greenInt = redInt / 16;
+        }
+
         //MyMessage.printf("Green Ouptut: %d\n\r", GreenCombo);
 
+        //WAIT FOR COMMAND FROM USER TO ENTER BLUE VALUE
         //Reading Blue lower and upper bit
         thread_sleep_for(100);
         data[0] = 0x9A;
@@ -285,6 +322,17 @@ void color_sensor() {
         LSB = hold[0];
 
         BlueCombo = ((MSB<<8)|LSB);
+        blueHex = BlueCombo/4;
+
+        j = 0;
+        while(blueInt != 0) { //TEST, REDINT MAY NEED TO BE A LONG INSTEAD OF AN INT
+            remainder = blueInt % 16;
+            if (remainder < 10)
+                bluehexnum[j++] = 48 + remainder;
+            else
+                bluehexnum[j++] = 55 + remainder;
+            blueInt = blueInt / 16;
+        }
         //MyMessage.printf("Blue Ouptut: %d\n\r", BlueCombo);
 
         //Reading clear lower and upper bit
@@ -298,7 +346,10 @@ void color_sensor() {
         colors.read(readaddr, hold, 1, false);
         LSB = hold[0];
 
-        ClearCombo = ((MSB<<8)|LSB);
+        ClearCombo = ((MSB<<8)|LSB); //1024 Maximum
+
+        for (i = j; i >= 0; i--) //If values are different lengths, may be an issue
+            test.printf("Detected hex value: #%i%i%i\r\n", redhexnum[i], greenhexnum[i], bluehexnum[i]);
     }
 }
 
