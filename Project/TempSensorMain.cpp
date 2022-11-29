@@ -256,6 +256,13 @@ int main() {
     port22 = 1;
 
     interruptTicker.attach(&setEFlag, 1.0);
+	
+ /* Color Sensor(needed after, not yet)   
+    SetHigh = 1;
+    SetHigh1 = 1;
+    thread3.start(BlinkLED);
+    thread1.start(colorimetry);
+*/
 
     while (true) {
         thread_sleep_for(1000);
