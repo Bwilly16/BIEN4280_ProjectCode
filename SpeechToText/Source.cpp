@@ -8,18 +8,32 @@
 #include <WinBase.h>
 #include <strsafe.h>
 
-
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 
 std::string GetEnvironmentVariable(const char* name);
 HANDLE hComm;
-char DataBuffer[];
+char DataBuffer[100];
+//const char* DataBuffer;
 DWORD dwBytesToWrite = (DWORD)strlen(DataBuffer);
 DWORD dwBytesWritten = 0;
 BOOL bErrorFlag = FALSE;
+BOOL bErrorFlag1 = FALSE;
 
-//void DisplayError(LPTSTR lpszFunction);
+void DisplayError(LPTSTR lpszFunction);
+
+#define BUFFERSIZE 5
+DWORD  dwBytesRead = 0;
+DWORD g_BytesTransferred = 0;
+char   ReadBuffer[BUFFERSIZE] = { 0 };
+OVERLAPPED ol = { 0 };
+
+
+VOID CALLBACK FileIOCompletionRoutine(
+    __in  DWORD dwErrorCode,
+    __in  DWORD dwNumberOfBytesTransfered,
+    __in  LPOVERLAPPED lpOverlapped
+);
 
 int main()
 {
@@ -56,11 +70,9 @@ int main()
     if (result->Reason == ResultReason::RecognizedSpeech)
     {
         std::cout << "\n\rRECOGNIZED: Text=" << result->Text.c_str() << std::endl;
-        //DataBuffer = result->Text.c_str();
-        char hold[20];
-        result->Text.copy(hold, sizeof hold);
-        std::cout << hold << '\n'; 
-        
+        result->Text.copy(DataBuffer, sizeof(DataBuffer));
+        std::cout << DataBuffer << std::endl; 
+
     }
     else if (result->Reason == ResultReason::NoMatch)
     {
@@ -82,20 +94,31 @@ int main()
 
     //set up communications 
     hComm = CreateFileA("COM10", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
-    
+
     std::cout << "Finished setting up communications" << std::endl;
-    
+
     bErrorFlag = WriteFile(
         hComm,           // open file handle
         DataBuffer,       // start of data to write
         dwBytesToWrite,  // number of bytes to write
         &dwBytesWritten, // number of bytes that were written
         NULL);
-        
-
     std::cout << "Done writing file" << std::endl;
+
+    bErrorFlag1 = ReadFile(
+        hComm,           // open file handle
+        DataBuffer,       // start of data to write
+        dwBytesToWrite,  // number of bytes to write
+        &dwBytesWritten, // number of bytes that were written
+        NULL);
+
+
+//reading the file
+ 
 }
-/*void DisplayError(LPTSTR lpszFunction)
+
+
+void DisplayError(LPTSTR lpszFunction)
 // Routine Description:
 // Retrieve and output the system error message for the last-error code
 {
@@ -136,7 +159,8 @@ int main()
     LocalFree(lpMsgBuf);
     LocalFree(lpDisplayBuf);
 }
-*/
+
+
 std::string GetEnvironmentVariable(const char* name)
 {
 #if defined(_MSC_VER)
