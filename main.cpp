@@ -27,7 +27,7 @@ const int readaddr8bit = 0xEF;  // read address
 
 I2C i2c(I2C_SDA0,I2C_SCL0);
 
-Mutex splitter_mutex;
+//Mutex splitter_mutex;
 
 /* Addresses for each of the registers
 AC1 = 0xAA, 0xAB;
@@ -384,7 +384,7 @@ void read_temperature (void)
               // attach the address of the flip function to the rising edge
     while(1) 
     {           // wait around, interrupts will interrupt this!
-        splitter_mutex.lock();
+        //splitter_mutex.lock();
         MyCereal.printf("LED ON TEMPERATURE \r\n"); 
         event_flag.wait_all(TEMPERATURE);
         flash = 0;
@@ -398,7 +398,7 @@ void read_temperature (void)
 
         MyCereal.printf("LED OFF TEMPERATURE \r\n"); 
 
-        splitter_mutex.unlock(); 
+        //splitter_mutex.unlock(); 
     }
 }
 
@@ -411,7 +411,13 @@ int main()
 
     thread2.start(setup);
     thread1.start(read_temperature);
-
+    
+ /* Color Sensor(needed after, not yet)   
+    SetHigh = 1;
+    SetHigh1 = 1;
+    thread3.start(BlinkLED);
+    thread1.start(colorimetry);
+*/ 
     while (true) {
   
         ThisThread::sleep_for(5000);
