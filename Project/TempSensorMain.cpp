@@ -217,6 +217,13 @@ void proximity_sensor(){
     }
 }
 
+void color_sensor(){
+    
+    while(true){
+
+    }
+}
+
 void setEFlag(){ //Send event flag to read_temperature
     //if(result == 'Activate temperature sensor'){
         PTEvent.set(SETTEMPERATURE);
@@ -237,6 +244,7 @@ void setEFlag(){ //Send event flag to read_temperature
 int main() {
     thread.start(read_temperature);
     thread1.start(proximity_sensor);
+    thread2.start(color_sensor);
 	//*LEDDIR = *LEDDIR | (1 << 6);
     //*LEDDIR = *LEDDIR | (1 << 16);
     //*LEDDIR = *LEDDIR | (1 << 24);
