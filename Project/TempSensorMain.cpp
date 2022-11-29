@@ -5,6 +5,7 @@
 #define LEDDIR (uint32_t*) 0x50000514 
 #define SETTEMPERATURE (1UL << 8)
 #define SETPROXIMITY (1UL << 8)
+#define SETCOLOR (1UL << 8)
 
 unsigned int readReg = 0xEF; //Read and write registers for temperature sensor
 unsigned int writeReg = 0xEE; 
@@ -12,22 +13,21 @@ unsigned int writeReg = 0xEE;
 unsigned int readRegProx = (0x39<<1) + 1; //Read and write registers for proximity sensor
 unsigned int writeRegProx = 0x39<<1;
 
+const int writeaddr = ((0x39 << 1) + 0); //write for board 0x72 //doesnt work
+const int readaddr =  ((0x39 << 1) + 1); //read for board 0x73 //works
+
 Ticker interruptTicker;
 USBSerial test;
 Thread thread, thread1, thread2;
 EventFlags PTEvent;
 I2C i2c(p31, p2); //(SDA, SCL)
+I2C colors(I2C_SDA1, I2C_SCL1); //p0.14, p0.15
 DigitalOut port22(p22);
 DigitalOut pullupResistor(p32); //Pin 32 = P1_0
 DigitalOut redLED(LED2);
 DigitalOut blueLED(LED4);
 DigitalOut greenLED(LED3);
-
-
-I2C colors(I2C_SDA1, I2C_SCL1); //p0.14, p0.15
 DigitalOut SetHigh(P1_0); //P1.0
-DigitalOut SetHigh1(p22); //GPIO P0.22;
-
 
 void read_temperature(){
     char temperatureData[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //char == uint8
@@ -48,7 +48,6 @@ void read_temperature(){
     //test.printf("1: Array[0] = %i \r\n\r\n", temperatureData[0]); //Check for signal from sensor
 
     if(temperatureData[0] == 85){
-
         //AC5
         temperatureData[0] = 0xB2;
         i2c.write(writeReg, temperatureData, 1, true);
@@ -221,78 +220,58 @@ void proximity_sensor(){
     }
 }
 
-void color_sensor(){
-   
-   // MyMessage.printf("Shift write %d\n\r", writeaddr);
-   // MyMessage.printf("Shift read %d\n\r", readaddr);
-
+void color_sensor() {
     uint8_t data[2];
     char hold[1];
-    char test1; //test ints to see if I am writing or reading properly
-    char test2;
-
-    uint16_t Red = 0;
-    uint16_t Blue = 0;
-    uint16_t Green = 0;
-    uint16_t Clear = 0;
-
-    uint16_t MSB = 0;
-    uint16_t LSB = 0;
-    uint16_t RedCombo = 0;
-    uint16_t GreenCombo = 0;
-    uint16_t BlueCombo = 0;
-    uint16_t ClearCombo = 0;
-
+    char test1, test2;
+    uint16_t Red = 0, Blue = 0, Green = 0, Clear = 0;
+    uint16_t MSB = 0, LSB = 0, RedCombo = 0, GreenCombo = 0, BlueCombo = 0, ClearCombo = 0;
 
     hold[0] = 0x00;
     data[0] = 0x92; //address of the ID register, output says 0xA8
 
     thread_sleep_for(1000);
+
     test1 = colors.write(writeaddr, (const char*) data, 1, true);
     test2 = colors.read(readaddr, hold, 1);
-    //MyMessage.printf("is it writing properly? %d\n\r", test1);
-    //MyMessage.printf("is it reading properly? %d\n\r", test2);
-   // MyMessage.printf("Communication with sensor established\n\r");
-   // MyMessage.printf("Is the output 0xA8? %d\n\r", hold[0]); //A8 = 168, AB = 171
 
-//Turning on the sensor
+    //MyMessage.printf("Is the output 0xA8? %d\n\r", hold[0]); //A8 = 168, AB = 171
+
+    //Turning on the sensor
     data[0] = 0x80; //write to this address
     data[1] = 0x13; //what is being written to address
     colors.write(writeaddr, (const char*) data, 2, true);
-   // MyMessage.printf("Power to sensor on\n\r");
 
-
-    while(true)
-    {
-    //Reading red lower and upper bit
+    while(true) {
+        int waitTemp = PTEvent.wait_any(SETCOLOR); //Wait for event flag, MIGHT need to be before while loop
+        
+        //Reading red lower and upper bit
         thread_sleep_for(100);
         data[0] = 0x96;
         test1 = colors.write(writeaddr, (const char*) data, 1, true);
         test2 = colors.read(readaddr, hold, 1, false);
         MSB = hold[0];
-        
-
         data[0] = 0x97;
         colors.write(writeaddr, (const char*) data, 1, true);
         colors.read(readaddr, hold, 1, false);
         LSB = hold[0];
+
         RedCombo = ((MSB<<8)|LSB);
-   // MyMessage.printf("Red Ouptut: %d\n\r", RedCombo);
+        //MyMessage.printf("Red Ouptut: %d\n\r", RedCombo);
 
-
-    //Reading Green lower and upper bit
+        //Reading Green lower and upper bit
         thread_sleep_for(100);
         data[0] = 0x98;
         colors.write(writeaddr, (const char*) data, 1, true);
         colors.read(readaddr, hold, 1, false);
         MSB = hold[0];
-
         data[0] = 0x99;
         colors.write(writeaddr, (const char*) data, 1, true);
         colors.read(readaddr, hold, 1, false);
         LSB = hold[0];
+
         GreenCombo = ((MSB<<8)|LSB);
-      // MyMessage.printf("Green Ouptut: %d\n\r", GreenCombo);
+        //MyMessage.printf("Green Ouptut: %d\n\r", GreenCombo);
 
         //Reading Blue lower and upper bit
         thread_sleep_for(100);
@@ -300,13 +279,13 @@ void color_sensor(){
         colors.write(writeaddr, (const char*) data, 1, true);
         colors.read(readaddr, hold, 1, false);
         MSB = hold[0];
-
         data[0] = 0x9B;
         colors.write(writeaddr, (const char*) data, 1, true);
         colors.read(readaddr, hold, 1, false);
         LSB = hold[0];
+
         BlueCombo = ((MSB<<8)|LSB);
-     // MyMessage.printf("Blue Ouptut: %d\n\r", BlueCombo);
+        //MyMessage.printf("Blue Ouptut: %d\n\r", BlueCombo);
 
         //Reading clear lower and upper bit
         thread_sleep_for(100);
@@ -314,14 +293,12 @@ void color_sensor(){
         colors.write(writeaddr, (const char*) data, 1, true);
         colors.read(readaddr, hold, 1, false);
         MSB = hold[0];
-
         data[0] = 0x95;
         colors.write(writeaddr, (const char*) data, 1, true);
         colors.read(readaddr, hold, 1, false);
         LSB = hold[0];
-        ClearCombo = ((MSB<<8)|LSB);
-    
 
+        ClearCombo = ((MSB<<8)|LSB);
     }
 }
 
