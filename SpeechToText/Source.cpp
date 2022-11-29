@@ -93,7 +93,7 @@ int main()
     }
 
     //set up communications 
-    hComm = CreateFileA("COM10", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
+    hComm = CreateFileA("COM9", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
 
     std::cout << "Finished setting up communications" << std::endl;
 
@@ -105,12 +105,17 @@ int main()
         NULL);
     std::cout << "Done writing file" << std::endl;
 
+    SleepEx(5000, TRUE);
+
     bErrorFlag1 = ReadFile(
         hComm,           // open file handle
         DataBuffer,       // start of data to write
         dwBytesToWrite,  // number of bytes to write
         &dwBytesWritten, // number of bytes that were written
         NULL);
+    
+    std::cout << hComm << std::endl;
+    SleepEx(5000, TRUE);
 
 
 //reading the file
