@@ -6,7 +6,7 @@
 #define SETTEMPERATURE (1UL << 8)
 #define SETPROXIMITY (1UL << 8)
 
-unsigned int readReg = 0xEF;
+unsigned int readReg = 0xEF; //Read and write registers for temperature sensor
 unsigned int writeReg = 0xEE; 
 
 unsigned int readRegProx = (0x39<<1) + 1; //Read and write registers for proximity sensor
@@ -39,7 +39,7 @@ void read_temperature(){
     i2c.write(writeReg, temperatureData, 1, true); //Send 0xD0 = 208
     i2c.read(readReg, temperatureData, 1); //Expect a 0x55 = 85 back
 
-    test.printf("1: Array[0] = %i \r\n\r\n", temperatureData[0]);
+    //test.printf("1: Array[0] = %i \r\n\r\n", temperatureData[0]); //Check for signal from sensor
 
     if(temperatureData[0] == 85){
 
@@ -130,34 +130,34 @@ void read_temperature(){
                 test.printf("Reading temperature: %i degrees C\r\n\r\n", T);
             }
             if(FARENEIT COMMAND == TRUE){
-                if(currentT >= (setT + 1)){
+                if(currentT >= (setT + 1)){ //If detected temp is higher than set temp, LED = red
                     greenLED = 1;
                     blueLED = 1;
                     redLED = 0;
                 }
-                else if(currentT <= (setT - 1)){
+                else if(currentT <= (setT - 1)){ //If detected temp is lower than set temp, LED = blue
                     greenLED = 1;
                     redLED = 1;
                     blueLED = 0;
                 }
-                else if (currentT > (setT - 1) || currentT < (setT + 1)){
+                else if (currentT > (setT - 1) || currentT < (setT + 1)){ //If detected temp is set temp, LED = green
                     redLED = 1;
                     blueLED = 1;
                     greenLED = 0;
                 }
             }
             else if(CELCIUS COMMAND == TRUE){*/
-                if(currentT >= (setT + 0.5)){
+                if(currentT >= (setT + 0.5)){ //If detected temp is higher than set temp, LED = red
                     greenLED = 1;
                     blueLED = 1;
                     redLED = 0;
                 }
-                else if(currentT <= (setT - 0.5)){
+                else if(currentT <= (setT - 0.5)){ //If detected temp is lower than set temp, LED = blue
                     greenLED = 1;
                     redLED = 1;
                     blueLED = 0;
                 }
-                else if (currentT > (setT - 0.5) || currentT < (setT + 0.5)){
+                else if (currentT > (setT - 0.5) || currentT < (setT + 0.5)){ //If detected temp is set temp, LED = green
                     redLED = 1;
                     blueLED = 1;
                     greenLED = 0;
@@ -171,12 +171,9 @@ void read_temperature(){
 void proximity_sensor(){
     char Data[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //char == uint8
     int i = 0;
-    long setProx = 0;
+    long setProx = 0; //Set to result from speech to text
 
     //setProx = result; //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-    test.printf("readReg: %i\r\n", readRegProx);
-    test.printf("writeReg: %i\r\n\r\n", writeRegProx);
 
     thread_sleep_for(10);
 
@@ -184,7 +181,7 @@ void proximity_sensor(){
     i2c.write(writeRegProx, Data, 1, true); //Check ID
     i2c.read(readRegProx, Data, 1); //Expect a 0xAB = 171 back
 
-    //test.printf("The sensor ID is: %d\r\n\r\n", Data[0]);
+    //test.printf("The sensor ID is: %d\r\n\r\n", Data[0]); //Check for connection
 
     if(Data[0] == 171){
             Data[0] = 0x90; //Increasing distance
@@ -196,13 +193,14 @@ void proximity_sensor(){
             i2c.write(writeRegProx, (const char *)Data, 2);
 
         while(true){
+            int waitTemp = PTEvent.wait_any(SETPROXIMITY); //Wait for event flag, MIGHT need to be before while loop
             thread_sleep_for(50); //5 millisecond buffer
 
             Data[0] = 0x80; //Send start signal
             Data[1] = 0x25;
             i2c.write(writeRegProx, (const char *)Data, 2);
 
-            thread_sleep_for(15);
+            thread_sleep_for(15); //Additional buffer time
 
             Data[0] = 0x9C; //Read data obtained
             i2c.write(writeRegProx, (const char *)Data, 1, true);
@@ -210,7 +208,7 @@ void proximity_sensor(){
 
             //test.printf("PDATA is: %d\r\n", Data[i]); //Data from chip
 
-            if((Data[0] < (setProx + 1)) && (Data[0] > (setProx - 1))) { //Estimated calibrations
+            if((Data[0] < (setProx + 1)) && (Data[0] > (setProx - 1))) { //Print if detected distance is close to set distance
                 test.printf("%i cm reached\r\n", setProx);
             }
         }
@@ -218,7 +216,7 @@ void proximity_sensor(){
 }
 
 void color_sensor(){
-    
+
     while(true){
 
     }
@@ -229,16 +227,19 @@ void setEFlag(){ //Send event flag to read_temperature
         PTEvent.set(SETTEMPERATURE);
     //}
     //else if(result == 'Activate proximity sensor'){
-        PTEvent.set(SETPROXIMITY);
-    //}
-    //else if(result == 'Activate color sensor'){
-    // PTEvent.set(SETCOLOR);
-    //}
+    /*    PTEvent.set(SETPROXIMITY);
+    }
+    else if(result == 'Activate color sensor'){
+     PTEvent.set(SETCOLOR);
+    }
+    else if(result == null){
+        thread_sleep_for(1);
+    }
     //else(){
         test.printf("Please activate a valid sensor\r\n\n");
         test.printf("VALID COMMANDS:\r\n");
-        test.printf("'Activate temperature sensor'\r\n'Activate proximity sensor'\r\n'Activate color sensor'");
-    //}
+        test.printf("'Activate temperature sensor'\r\n'Activate proximity sensor'\r\n'Activate color sensor'\r\n");
+    //}*/
 }
 
 int main() {
@@ -252,10 +253,11 @@ int main() {
     redLED = 1; //Turns LED off when first setting bits, causes a short blink
     blueLED = 1;
     greenLED = 1;
+
     pullupResistor = 1;
     port22 = 1;
 
-    interruptTicker.attach(&setEFlag, 1.0);
+    interruptTicker.attach(&setEFlag, 1.0); //Check for command every 1 second, may need to slow down
 
     while (true) {
         thread_sleep_for(1000);
