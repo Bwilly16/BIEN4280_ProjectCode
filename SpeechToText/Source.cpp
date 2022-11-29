@@ -14,10 +14,11 @@ using namespace Microsoft::CognitiveServices::Speech::Audio;
 
 std::string GetEnvironmentVariable(const char* name);
 HANDLE hComm;
-char DataBuffer[];
+char DataBuffer[] = "test data to write to file";
 DWORD dwBytesToWrite = (DWORD)strlen(DataBuffer);
 DWORD dwBytesWritten = 0;
 BOOL bErrorFlag = FALSE;
+TCHAR* argv[10];
 
 void DisplayError(LPTSTR lpszFunction);
 
@@ -76,13 +77,8 @@ int main()
     }
 
     //set up communications 
-    hComm = CreateFileA("COM10", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
-    if (hComm == INVALID_HANDLE_VALUE)
-    {
-        DisplayError(TEXT("CreateFile"));
-        _tprintf(TEXT("Terminal failure: Unable to open file \"%s\" for write.\n"), argv[1]);
-        return;
-    }
+    hComm = CreateFileA("COM9", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
+    
     std::cout << "Finished setting up communications" << std::endl;
 
     bErrorFlag = WriteFile(
@@ -91,6 +87,8 @@ int main()
         dwBytesToWrite,  // number of bytes to write
         &dwBytesWritten, // number of bytes that were written
         NULL);
+
+    std::cout << "Done writing file" << std::endl;
 }
 void DisplayError(LPTSTR lpszFunction)
 // Routine Description:
