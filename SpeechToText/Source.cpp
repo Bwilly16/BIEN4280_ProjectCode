@@ -14,13 +14,12 @@ using namespace Microsoft::CognitiveServices::Speech::Audio;
 
 std::string GetEnvironmentVariable(const char* name);
 HANDLE hComm;
-char DataBuffer[] = "test data to write to file";
+char DataBuffer[];
 DWORD dwBytesToWrite = (DWORD)strlen(DataBuffer);
 DWORD dwBytesWritten = 0;
 BOOL bErrorFlag = FALSE;
-TCHAR* argv[10];
 
-void DisplayError(LPTSTR lpszFunction);
+//void DisplayError(LPTSTR lpszFunction);
 
 int main()
 {
@@ -56,7 +55,12 @@ int main()
 
     if (result->Reason == ResultReason::RecognizedSpeech)
     {
-        std::cout << "\n\rRECOGNIZED: Text=" << result->Text << std::endl;
+        std::cout << "\n\rRECOGNIZED: Text=" << result->Text.c_str() << std::endl;
+        //DataBuffer = result->Text.c_str();
+        char hold[20];
+        result->Text.copy(hold, sizeof hold);
+        std::cout << hold << '\n'; 
+        
     }
     else if (result->Reason == ResultReason::NoMatch)
     {
@@ -77,20 +81,21 @@ int main()
     }
 
     //set up communications 
-    hComm = CreateFileA("COM9", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
+    hComm = CreateFileA("COM10", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
     
     std::cout << "Finished setting up communications" << std::endl;
-
+    
     bErrorFlag = WriteFile(
         hComm,           // open file handle
         DataBuffer,       // start of data to write
         dwBytesToWrite,  // number of bytes to write
         &dwBytesWritten, // number of bytes that were written
         NULL);
+        
 
     std::cout << "Done writing file" << std::endl;
 }
-void DisplayError(LPTSTR lpszFunction)
+/*void DisplayError(LPTSTR lpszFunction)
 // Routine Description:
 // Retrieve and output the system error message for the last-error code
 {
@@ -131,7 +136,7 @@ void DisplayError(LPTSTR lpszFunction)
     LocalFree(lpMsgBuf);
     LocalFree(lpDisplayBuf);
 }
-
+*/
 std::string GetEnvironmentVariable(const char* name)
 {
 #if defined(_MSC_VER)
