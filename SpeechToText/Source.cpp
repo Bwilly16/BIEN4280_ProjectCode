@@ -184,7 +184,7 @@ int main()
         std::cout << "Successful read\n" << std::endl;
     }
 
-    std::cout <<"This is the what is in the DataBuffer array after the first read:" << DataRead << std::endl;
+    std::cout <<"This is the what is in the DataBuffer array after the first read:\n" << DataRead << std::endl;
     //std::cout << "This is the what is in the &dwBytesRead:" << dwBytesRead << std::endl;
 
    // std::cout << "this is the value of hComm" << std::endl;
