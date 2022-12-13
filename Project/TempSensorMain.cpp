@@ -7,14 +7,6 @@
 #define SETPROXIMITY (1UL << 8)
 #define SETCOLOR (1UL << 8)
 
-/* this gets us the data from the chip
-uint16_t test;
- test = MyCereal.getc();
- test = test - 48;
- MyCereal.printf("This is test %i", test);
- thread_sleep_for(1000);
-*/
-
 unsigned int readReg = 0xEF; //Read and write registers for temperature sensor
 unsigned int writeReg = 0xEE; 
 
@@ -36,6 +28,8 @@ DigitalOut redLED(LED2);
 DigitalOut blueLED(LED4);
 DigitalOut greenLED(LED3);
 DigitalOut SetHigh(P1_0); //P1.0
+
+uint16_t result;
 
 void read_temperature(){
     int waitTemp = PTEvent.wait_any(SETTEMPERATURE); //Wait for event flag
@@ -362,26 +356,21 @@ void color_sensor() {
 }
 
 void setEFlag(){ //Send event flag to read_temperature
-    //if(result == 'Activate temperature sensor'){
+    if(result == 6){
         PTEvent.set(SETTEMPERATURE);
-    //}
-    //else if(result == 'Activate proximity sensor'){
-    /*    PTEvent.set(SETPROXIMITY);
     }
-    else if(result == 'Activate color sensor'){
+    else if(result == 4){
+        PTEvent.set(SETPROXIMITY);
+    }
+    else if(result == 1){
      PTEvent.set(SETCOLOR);
     }
-    else if(result == null){
-        thread_sleep_for(1);
-    }
-    //else(){
+    else{
         test.printf("Please activate a valid sensor\r\n\n");
         test.printf("VALID COMMANDS:\r\n");
         test.printf("'Activate temperature sensor'\r\n'Activate proximity sensor'\r\n'Activate color sensor'\r\n");
-    //}*/
+    }
 }
-
-
 
 int main() {
     
@@ -402,8 +391,9 @@ int main() {
 
     interruptTicker.attach(&setEFlag, 1.0); //Check for command every 1 second, may need to slow down
 
-
-
+    result = test.getc();
+    result = result - 48;
+    test.printf("This is test %i", result);
 
     while (true) {
         thread_sleep_for(1000);
