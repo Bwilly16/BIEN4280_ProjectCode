@@ -32,7 +32,7 @@ DigitalOut SetHigh(P1_0); //P1.0
 uint16_t result;
 
 void read_temperature(){
-    int waitTemp = PTEvent.wait_any(SETTEMPERATURE); //Wait for event flag
+    //int waitTemp = PTEvent.wait_any(SETTEMPERATURE); //Wait for event flag
     char temperatureData[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //char == uint8
     unsigned short AC5, AC6; //Initializing constants and variables
     short MC, MD;
@@ -176,7 +176,7 @@ void read_temperature(){
 }
 
 void proximity_sensor(){
-    int waitTemp = PTEvent.wait_any(SETPROXIMITY); //Wait for event flag, MIGHT need to be before while loop
+    //int waitTemp = PTEvent.wait_any(SETPROXIMITY); //Wait for event flag, MIGHT need to be before while loop
     char Data[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //char == uint8
     int i = 0;
     long setProx = 0; //Set to result from speech to text
@@ -226,7 +226,7 @@ void proximity_sensor(){
 }
 
 void color_sensor() {
-    int waitTemp = PTEvent.wait_any(SETCOLOR); //Wait for event flag, MIGHT need to be before while loop
+    //int waitTemp = PTEvent.wait_any(SETCOLOR); //Wait for event flag, MIGHT need to be before while loop
     uint8_t data[2];
     char hold[1];
     char test1, test2;
@@ -355,7 +355,7 @@ void color_sensor() {
             test.printf("Detected hex value: #%i%i%i\r\n", redhexnum[i], greenhexnum[i], bluehexnum[i]);
     }
 }
-
+/*
 void setEFlag(){ //Send event flag to read_temperature
     //test.printf("In setFlag");
     if(result == 6){
@@ -364,7 +364,7 @@ void setEFlag(){ //Send event flag to read_temperature
         /*test.printf("")
         result = test.getc();
         result = result - 48;
-        test.printf("Set temperature: %i", result);*/
+        test.printf("Set temperature: %i", result);
     }
     else if(result == 4){
         PTEvent.set(SETPROXIMITY);
@@ -378,11 +378,11 @@ void setEFlag(){ //Send event flag to read_temperature
         test.printf("'Activate temperature sensor'\r\n'Activate proximity sensor'\r\n'Activate color sensor'\r\n");
     }
 }
-
+*/
 int main() {
-    thread.start(read_temperature);
+   /* thread.start(read_temperature);
     thread1.start(proximity_sensor);
-    thread2.start(color_sensor);
+    thread2.start(color_sensor);*/
 	//*LEDDIR = *LEDDIR | (1 << 6);
     //*LEDDIR = *LEDDIR | (1 << 16);
     //*LEDDIR = *LEDDIR | (1 << 24);
@@ -398,7 +398,17 @@ int main() {
     result = result - 48;
     //test.printf("This is test %i", result);
 
-    interruptTicker.attach(&setEFlag, 1.0); //Check for command every 1 second, may need to slow down
+    if(result == 6){
+        thread.start(read_temperature);
+    }
+    else if(result == 4){
+        thread.start(proximity_sensor);
+    }
+    else if(result == 1){
+        thread.start(color_sensor);
+    }
+
+    //interruptTicker.attach(&setEFlag, 1.0); //Check for command every 1 second, may need to slow down
 
     while (true) {
         thread_sleep_for(1000);
