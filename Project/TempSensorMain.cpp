@@ -373,7 +373,10 @@ void setEFlag(){ //Send event flag to read_temperature
     //}*/
 }
 
+
+
 int main() {
+    
     test.printf("Got into Mbed\r\n");
     thread.start(read_temperature);
     thread1.start(proximity_sensor);
@@ -390,6 +393,9 @@ int main() {
     port22 = 1;
 
     interruptTicker.attach(&setEFlag, 1.0); //Check for command every 1 second, may need to slow down
+
+
+
 
     while (true) {
         thread_sleep_for(1000);
