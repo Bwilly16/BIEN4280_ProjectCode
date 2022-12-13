@@ -360,6 +360,7 @@ void setEFlag(){ //Send event flag to read_temperature
     //test.printf("In setFlag");
     if(result == 6){
         PTEvent.set(SETTEMPERATURE);
+        test.printf("In set temp   ");
         /*test.printf("")
         result = test.getc();
         result = result - 48;
