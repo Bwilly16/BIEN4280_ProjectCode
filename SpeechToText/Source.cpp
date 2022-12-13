@@ -13,17 +13,20 @@ using namespace Microsoft::CognitiveServices::Speech::Audio;
 
 std::string GetEnvironmentVariable(const char* name);
 HANDLE hComm;
-char DataBuffer[100];
-//const char* DataBuffer;
-DWORD dwBytesToWrite = (DWORD)strlen(DataBuffer);
-DWORD dwBytesWritten = 0;
+char DataBuffer[50];
+char DataRead[50];
+DWORD dwBytesToWrite = 1;
+DWORD dwBytesWritten;
+DWORD dwBytesToRead = 6; //change to whatever length we want to read from MBED
+                         // will wait forever if length we expect is longer than what MBED sends
+DWORD dwBytesRead;
 BOOL bErrorFlag = FALSE;
 BOOL bErrorFlag1 = FALSE;
+BOOL bErrorFlagOrigin = FALSE;
 
 void DisplayError(LPTSTR lpszFunction);
 
 #define BUFFERSIZE 5
-DWORD  dwBytesRead = 0;
 DWORD g_BytesTransferred = 0;
 char   ReadBuffer[BUFFERSIZE] = { 0 };
 OVERLAPPED ol = { 0 };
@@ -37,7 +40,9 @@ VOID CALLBACK FileIOCompletionRoutine(
 
 int main()
 {
-    // This example requires environment variables named "SPEECH_KEY" and "SPEECH_REGION"
+
+    
+
     auto speechKey = GetEnvironmentVariable("SPEECH_KEY");
     auto speechRegion = GetEnvironmentVariable("SPEECH_REGION");
 
@@ -55,23 +60,63 @@ int main()
 
     printf("Speak into your microphone!\n\n\r");
     printf("-------------------------------\n\n\r");
-    printf("Command 1: Activate Color Sensor\n");
-    printf("Command 2: Add (Color Value)\n");
-    printf("Command 3: Reset Color Value\n");
-    printf("Command 4: Activate Proximity Sensor\n");
-    printf("Command 5: Set Proximity to (Height)\n");
-    printf("Command 6: Activate Temperature Sensor\n");
-    printf("Command 7: What's the temperature in Celcius\n");
-    printf("Command 8: What's the temperature in Farinheit\n");
-    printf("Command 9: Set Temperature to (Number)\n");
+    printf("SAY ONE OF THESE COMMANDS EXACTLY:\n");
+    printf("Activate color sensor.\n");
+    printf("Add color together.\n");
+    printf("Reset color value.\n");
+    printf("Activate proximity sensor.\n");
+    printf("Set proximity to 10.\n");
+    printf("Activate temperature sensor.\n");
+    printf("What's the temperature in Celsius?\n");
+    printf("What's the temperature in Fahrenheit?\n");
+    printf("Set reference temperature to 70.\n");
 
     auto result = recognizer->RecognizeOnceAsync().get();
 
+    
     if (result->Reason == ResultReason::RecognizedSpeech)
     {
-        std::cout << "\n\rRECOGNIZED: Text=" << result->Text.c_str() << std::endl;
-        result->Text.copy(DataBuffer, sizeof(DataBuffer));
-        std::cout << DataBuffer << std::endl; 
+
+        std::cout << "\n\rRECOGNIZED: Text = " << result->Text << std::endl; //Text.c_str() changed to Text
+        //result->Text.copy(DataBuffer, sizeof(DataBuffer));
+        
+       // DataBuffer[0] = 0;
+
+        if (result->Text.compare("Activate color sensor.") == 0) { // Command 1 
+            DataBuffer[0] = '1'; // set command 1 to send 1 // no matter what this line happens
+        }
+        else if(result->Text.compare("Add color together.") == 0) { // Command 2
+            DataBuffer[0] = '2';
+        }
+        else if(result->Text.compare("Reset color value.") == 0) { // Command 3
+            DataBuffer[0] = '3';
+        }
+        else if(result->Text.compare("Activate proximity sensor.") == 0) { // Command 4 possibly delete
+            DataBuffer[0] = '4';
+        }
+        else if(result->Text.compare("Set proximity to 10.") == 0) { // Command 5
+            DataBuffer[0] = '5';
+        }
+        else if(result->Text.compare("Activate temperature sensor.") == 0) { // Command 6 // possibly delete
+            DataBuffer[0] = '6';
+        }
+        else if(result->Text.compare("What's the temperature in Celsius?") == 0) { // Command 7
+            DataBuffer[0] = '7';
+        }
+        else if(result->Text.compare("What's the temperature in Fahrenheit?") == 0) { // Command 8
+            DataBuffer[0] = '8';
+        }
+        else if(result->Text.compare("Set reference temperature to 70.") == 0) { // Command 9
+            DataBuffer[0] = '9';
+        }
+        else {
+            DataBuffer[0] = '0';
+            std::cout << "Given command was not recognized :( Try Again\n" << std::endl;
+        }
+
+        std::cout << "Whats in data buffer strings are compared:\n " << DataBuffer << std::endl;
+
+
 
     }
     else if (result->Reason == ResultReason::NoMatch)
@@ -92,10 +137,20 @@ int main()
         }
     }
 
+    
     //set up communications 
-    hComm = CreateFileA("COM9", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
+    hComm = CreateFile(L"\\\\.\\COM10", GENERIC_WRITE | GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL); //if stops working, change EXISTING to CREATE_NEW, FILE_SHARE_READ to 0
 
-    std::cout << "Finished setting up communications" << std::endl;
+    if (hComm == INVALID_HANDLE_VALUE) {
+        std::cout << "Serial port not open\n" << std::endl;
+    }
+    else {
+        std::cout << "Serial port open!\n" << std::endl;
+    }
+    EscapeCommFunction(hComm, CLRDTR);//set up the "acceptance of a message"
+    EscapeCommFunction(hComm, SETDTR);//set up the "acceptance of a message"
+
+    //Write what we say to the microcontroller
 
     bErrorFlag = WriteFile(
         hComm,           // open file handle
@@ -103,22 +158,62 @@ int main()
         dwBytesToWrite,  // number of bytes to write
         &dwBytesWritten, // number of bytes that were written
         NULL);
-    std::cout << "Done writing file" << std::endl;
 
-    SleepEx(5000, TRUE);
+    if (bErrorFlag == FALSE) {
+        std::cout << "\n Fail to Write\n" << std::endl;
+    }
+    else {
+        std::cout << "Successful write\n" << std::endl;
+    }
+    std::cout << "Whats was just written to the chip?:\n " << DataBuffer << std::endl;
 
-    bErrorFlag1 = ReadFile(
+    //read once Mbed sends a message back
+
+    bErrorFlagOrigin = ReadFile(
         hComm,           // open file handle
-        DataBuffer,       // start of data to write
-        dwBytesToWrite,  // number of bytes to write
-        &dwBytesWritten, // number of bytes that were written
+        DataRead,       // start of data to read
+        dwBytesToRead,  // number of bytes to read
+        &dwBytesRead, // number of bytes that were read
         NULL);
+        
+
+    if (bErrorFlagOrigin == FALSE) {
+        std::cout << "\n Fail to read\n" << std::endl;
+    }
+    else {
+        std::cout << "Successful read\n" << std::endl;
+    }
+
+    std::cout <<"This is the what is in the DataBuffer array after the first read:" << DataRead << std::endl;
+    //std::cout << "This is the what is in the &dwBytesRead:" << dwBytesRead << std::endl;
+
+   // std::cout << "this is the value of hComm" << std::endl;
+   // std::cout << hComm << std::endl;
+   // EscapeCommFunction(hComm, CLRDTR);//set up the "acceptance of a message"
+   // EscapeCommFunction(hComm, SETDTR);//set up the "acceptance of a message"
+
+   
+   // std::cout << "this is the number of bytes written: " << dwBytesWritten << std::endl;
     
-    std::cout << hComm << std::endl;
-    SleepEx(5000, TRUE);
+   // EscapeCommFunction(hComm, CLRDTR);//set up the "acceptance of a message"
+   // EscapeCommFunction(hComm, SETDTR);//set up the "acceptance of a message"
+    //reading the file
 
 
-//reading the file
+    // std::cout << "bErrorFlag1 BOOL: " << std::endl;
+    // std::cout << bErrorFlag1 << std::endl;
+    //printf("Number of bytes read: %d\n", dwBytesRead);
+    
+     // files get read into this buffer
+    //SleepEx(5000, TRUE);
+
+    //std::cout << "Finished setting up communications" << std::endl;
+    
+   // std::cout << "This is the data buffer after writing" << std::endl;
+    //std::cout << DataBuffer << std::endl; // files get read into this buffer
+
+    //SleepEx(5000, TRUE);
+    
  
 }
 
