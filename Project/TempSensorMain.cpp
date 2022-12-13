@@ -3,8 +3,8 @@
 #include <I2C.h>
 
 #define LEDDIR (uint32_t*) 0x50000514 
-#define SETTEMPERATURE (1UL << 8)
-#define SETPROXIMITY (1UL << 8)
+#define SETTEMPERATURE (1UL << 2)
+#define SETPROXIMITY (1UL << 4)
 #define SETCOLOR (1UL << 8)
 
 unsigned int readReg = 0xEF; //Read and write registers for temperature sensor
