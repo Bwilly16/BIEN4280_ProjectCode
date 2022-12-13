@@ -7,6 +7,14 @@
 #define SETPROXIMITY (1UL << 8)
 #define SETCOLOR (1UL << 8)
 
+/* this gets us the data from the chip
+uint16_t test;
+ test = MyCereal.getc();
+ test = test - 48;
+ MyCereal.printf("This is test %i", test);
+ thread_sleep_for(1000);
+*/
+
 unsigned int readReg = 0xEF; //Read and write registers for temperature sensor
 unsigned int writeReg = 0xEE; 
 
