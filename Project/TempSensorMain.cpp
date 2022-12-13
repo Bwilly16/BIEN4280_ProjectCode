@@ -123,7 +123,8 @@ void read_temperature(){
 
             setT = 40; //FOR TESTING ONLY
 
-            test.printf("Reading temperature: %i degrees C\r\n\r\n", currentT);
+            //test.printf("Reading temperature: %i degrees C\r\n\r\n", currentT);
+            test.printf("Temperature %i", currentT);
 
             /* //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             scanf("%s", command);
@@ -356,14 +357,19 @@ void color_sensor() {
 }
 
 void setEFlag(){ //Send event flag to read_temperature
+    //test.printf("In setFlag");
     if(result == 6){
         PTEvent.set(SETTEMPERATURE);
+        /*test.printf("")
+        result = test.getc();
+        result = result - 48;
+        test.printf("Set temperature: %i", result);*/
     }
     else if(result == 4){
         PTEvent.set(SETPROXIMITY);
     }
     else if(result == 1){
-     PTEvent.set(SETCOLOR);
+        PTEvent.set(SETCOLOR);
     }
     else{
         test.printf("Please activate a valid sensor\r\n\n");
@@ -373,8 +379,6 @@ void setEFlag(){ //Send event flag to read_temperature
 }
 
 int main() {
-    
-    //test.printf("Got into Mbed\r\n");
     thread.start(read_temperature);
     thread1.start(proximity_sensor);
     thread2.start(color_sensor);
@@ -389,11 +393,11 @@ int main() {
     pullupResistor = 1;
     port22 = 1;
 
-    interruptTicker.attach(&setEFlag, 1.0); //Check for command every 1 second, may need to slow down
-
     result = test.getc();
     result = result - 48;
-    test.printf("This is test %i", result);
+    //test.printf("This is test %i", result);
+
+    interruptTicker.attach(&setEFlag, 1.0); //Check for command every 1 second, may need to slow down
 
     while (true) {
         thread_sleep_for(1000);
