@@ -4,8 +4,8 @@
 
 #define LEDDIR (uint32_t*) 0x50000514 
 #define SETTEMPERATURE (1UL << 8)
-#define SETPROXIMITY (1UL << 8)
-#define SETCOLOR (1UL << 8)
+#define SETPROXIMITY (1UL << 4)
+#define SETCOLOR (1UL << 2)
 
 unsigned int readReg = 0xEF; //Read and write registers for temperature sensor
 unsigned int writeReg = 0xEE; 
@@ -46,7 +46,7 @@ void read_temperature(){
     i2c.write(writeReg, temperatureData, 1, true); //Send 0xD0 = 208
     i2c.read(readReg, temperatureData, 1); //Expect a 0x55 = 85 back
 
-    //test.printf("1: Array[0] = %i \r\n\r\n", temperatureData[0]); //Check for signal from sensor
+    test.printf("1: Array[0] = %i \r\n\r\n", temperatureData[0]); //Check for signal from sensor
 
     if(temperatureData[0] == 85){
         //AC5
