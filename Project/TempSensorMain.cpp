@@ -146,8 +146,13 @@ void read_temperature(){
                 }
             }
 <<<<<<< HEAD
+<<<<<<< HEAD
             else if(CELCIUS COMMAND == TRUE){*/
                 if(currentT >= (setT + 0.5)){ //If detected temp is higher than set temp, LED = red
+=======
+            else if(CELCIUS COMMAND == TRUE){
+                 if(currentT >= (setT + 0.5)){
+>>>>>>> parent of 1d3de65 (LEDs working for temp reading progress check)
 =======
             else if(CELCIUS COMMAND == TRUE){
                  if(currentT >= (setT + 0.5)){
