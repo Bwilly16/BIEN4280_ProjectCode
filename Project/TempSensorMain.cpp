@@ -374,7 +374,6 @@ void setEFlag(){ //Send event flag to read_temperature
 }
 
 int main() {
-    test.printf("Got into Mbed\r\n");
     thread.start(read_temperature);
     thread1.start(proximity_sensor);
     thread2.start(color_sensor);
