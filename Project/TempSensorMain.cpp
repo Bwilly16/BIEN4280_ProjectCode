@@ -3,9 +3,9 @@
 #include <I2C.h>
 
 #define LEDDIR (uint32_t*) 0x50000514 
-#define SETTEMPERATURE (1UL << 2)
+#define SETTEMPERATURE (1UL << 8)
 #define SETPROXIMITY (1UL << 4)
-#define SETCOLOR (1UL << 8)
+#define SETCOLOR (1UL << 2)
 
 unsigned int readReg = 0xEF; //Read and write registers for temperature sensor
 unsigned int writeReg = 0xEE; 
@@ -32,6 +32,7 @@ DigitalOut SetHigh(P1_0); //P1.0
 uint16_t result;
 
 void read_temperature(){
+    test.printf("in read_temp now");
     //int waitTemp = PTEvent.wait_any(SETTEMPERATURE); //Wait for event flag
     char temperatureData[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //char == uint8
     unsigned short AC5, AC6; //Initializing constants and variables
@@ -48,9 +49,10 @@ void read_temperature(){
     i2c.write(writeReg, temperatureData, 1, true); //Send 0xD0 = 208
     i2c.read(readReg, temperatureData, 1); //Expect a 0x55 = 85 back
 
-    //test.printf("1: Array[0] = %i \r\n\r\n", temperatureData[0]); //Check for signal from sensor
+    test.printf("1: Array[0] = %i \r\n\r\n", temperatureData[0]); //Check for signal from sensor
 
     if(temperatureData[0] == 85){
+        test.printf("\n\r Reading temperature sensor correctly");
         //AC5
         temperatureData[0] = 0xB2;
         i2c.write(writeReg, temperatureData, 1, true);
@@ -96,6 +98,7 @@ void read_temperature(){
         MD = ((MSB<<8)|LSB);
 
         while(true){
+            printf("\n\r in while loop\n\r");
             temperatureData[0] = 0xF4;
             temperatureData[1] = 0x2E;
             i2c.write(writeReg, (const char *)temperatureData, 2); //Send 0xF4 = 244 and 0x2E = 46 to start temperature reading
@@ -124,7 +127,7 @@ void read_temperature(){
             setT = 40; //FOR TESTING ONLY
 
             //test.printf("Reading temperature: %i degrees C\r\n\r\n", currentT);
-            test.printf("Temperature %i", currentT);
+            test.printf("\r\nTemperature %i", currentT);
 
             /* //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             scanf("%s", command);
@@ -394,12 +397,14 @@ int main() {
     pullupResistor = 1;
     port22 = 1;
 
-    result = test.getc();
-    result = result - 48;
-    //test.printf("This is test %i", result);
+    //result = test.getc();
+    //result = result - 48;
+    result = 6;
+    //test.printf("This is test %i\n\r", result);
 
     if(result == 6){
         thread.start(read_temperature);
+        //test.printf("starting read_temp\n\r");
     }
     else if(result == 4){
         thread.start(proximity_sensor);
