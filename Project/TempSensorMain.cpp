@@ -3,6 +3,7 @@
 #include <I2C.h>
 
 #define LEDDIR (uint32_t*) 0x50000514 
+//#define SETPRESSURE (1UL << 4)
 #define SETTEMPERATURE (1UL << 8)
 #define SETPROXIMITY (1UL << 4)
 #define SETCOLOR (1UL << 2)
@@ -38,8 +39,6 @@ void read_temperature(){
     uint16_t MSB, LSB;
     int i = 0;
 
-    //string command;
-    //scanf("%s", command);
     //setT = PLACEHOLDER FOR COMMAND ENTERED; //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     temperatureData[0] = 0xD0;
@@ -119,13 +118,9 @@ void read_temperature(){
             currentT = (B5 + 8)/16;
             currentT = currentT/10;
 
-            setT = 40; //FOR TESTING ONLY
-
             test.printf("Reading temperature: %i degrees C\r\n\r\n", currentT);
 
             /* //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            scanf("%s", command);
-            
             if(FARENHEIT COMMAND == TRUE){ 
                 T = (1.8 * T) + 32;
                 test.printf("Reading temperature: %i degrees F\r\n\r\n", T);
@@ -150,8 +145,13 @@ void read_temperature(){
                     greenLED = 0;
                 }
             }
+<<<<<<< HEAD
             else if(CELCIUS COMMAND == TRUE){*/
                 if(currentT >= (setT + 0.5)){ //If detected temp is higher than set temp, LED = red
+=======
+            else if(CELCIUS COMMAND == TRUE){
+                 if(currentT >= (setT + 0.5)){
+>>>>>>> parent of 1d3de65 (LEDs working for temp reading progress check)
                     greenLED = 1;
                     blueLED = 1;
                     redLED = 0;
@@ -165,7 +165,7 @@ void read_temperature(){
                     redLED = 1;
                     blueLED = 1;
                     greenLED = 0;
-                }/*
+                }
             }
             */
         }
