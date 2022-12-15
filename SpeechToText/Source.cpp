@@ -62,7 +62,7 @@ int main()
     printf("-------------------------------\n\n\r");
     printf("SAY ONE OF THESE COMMANDS EXACTLY:\n");
     printf("What color am I looking at?\n"); // 1
-    printf("Set proximity to 10.\n");// 2
+    printf("Activate proximity sensor.\n");// 2
     printf("What's the temperature in Celsius?\n"); // 3
     printf("What's the temperature in Fahrenheit?\n"); // 4
 
@@ -80,7 +80,7 @@ int main()
         if (result->Text.compare("What color am I looking at?") == 0) { // Command 1 
             DataBuffer[0] = '1'; // set command 1 to send 1 // no matter what this line happens
         }
-        else if(result->Text.compare("Set proximity to 10.") == 0) { // Command 5
+        else if(result->Text.compare("Activate proximity sensor.") == 0) { // Command 5
             DataBuffer[0] = '2';
         }
         else if(result->Text.compare("What's the temperature in Celsius?") == 0) { // Command 6 // possibly delete
