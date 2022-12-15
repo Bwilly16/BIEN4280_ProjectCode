@@ -348,7 +348,7 @@ void color_sensor() {
         ClearCombo = ((MSB<<8)|LSB); //1024 Maximum
 
         for (i = j; i >= 0; i--) //If values are different lengths, may be an issue
-            test.printf("#%i%i%i\r\n    ", redhexnum[i], greenhexnum[i], bluehexnum[i]);
+            test.printf("#%i%i%i\r\n                    ", redhexnum[i], greenhexnum[i], bluehexnum[i]);
     }
 }
 
@@ -363,7 +363,6 @@ int main() {
 
     result = test.getc();
     result = result - 48;
-    test.printf("Result: %i      ", result);
 
     if(result == (3 | 4)){
         thread.start(read_temperature);
