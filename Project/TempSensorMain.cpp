@@ -364,7 +364,7 @@ int main() {
     result = test.getc();
     result = result - 48;
 
-    if(result == 3 || 4){
+    if(result == (3 || 4)){
         thread.start(read_temperature);
     }
     else if(result == 2){
