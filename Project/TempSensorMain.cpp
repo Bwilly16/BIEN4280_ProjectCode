@@ -268,8 +268,9 @@ void color_sensor() {
 
         RedCombo = ((MSB<<8)|LSB);
         redInt = RedCombo/4;
-
+        /*
         j = 0;
+        
         while(redInt != 0) { //TEST, REDINT MAY NEED TO BE A LONG INSTEAD OF AN INT
             remainder = redInt % 16;
             if (remainder < 10)
@@ -277,7 +278,7 @@ void color_sensor() {
             else
                 redhexnum[j++] = 55 + remainder;
             redInt = redInt / 16;
-        }
+        }*/
 
         //MyMessage.printf("Red Ouptut: %d\n\r", RedCombo);
 
@@ -295,7 +296,7 @@ void color_sensor() {
 
         GreenCombo = ((MSB<<8)|LSB);
         greenInt = GreenCombo/4;
-
+        /*
         j = 0;
         while(greenInt != 0) { //TEST, REDINT MAY NEED TO BE A LONG INSTEAD OF AN INT
             remainder = greenInt % 16;
@@ -305,7 +306,7 @@ void color_sensor() {
                 greenhexnum[j++] = 55 + remainder;
             greenInt = redInt / 16;
         }
-
+        */
         //MyMessage.printf("Green Ouptut: %d\n\r", GreenCombo);
 
         //WAIT FOR COMMAND FROM USER TO ENTER BLUE VALUE
@@ -322,7 +323,7 @@ void color_sensor() {
 
         BlueCombo = ((MSB<<8)|LSB);
         blueHex = BlueCombo/4;
-
+        /*
         j = 0;
         while(blueInt != 0) { //TEST, REDINT MAY NEED TO BE A LONG INSTEAD OF AN INT
             remainder = blueInt % 16;
@@ -332,6 +333,7 @@ void color_sensor() {
                 bluehexnum[j++] = 55 + remainder;
             blueInt = blueInt / 16;
         }
+        */
         //MyMessage.printf("Blue Ouptut: %d\n\r", BlueCombo);
 
         //Reading clear lower and upper bit
@@ -348,7 +350,7 @@ void color_sensor() {
         ClearCombo = ((MSB<<8)|LSB); //1024 Maximum
 
         for (i = j; i >= 0; i--) //If values are different lengths, may be an issue
-            test.printf("#%i,%i,%i\r\n        ", redhexnum[i], greenhexnum[i], bluehexnum[i]);
+            test.printf("%i, %i, %i\r\n        ", redHex, greenHex, blueHex);
     }
 }
 
