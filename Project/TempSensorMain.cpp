@@ -209,6 +209,9 @@ void proximity_sensor(){
             i2c.read(readRegProx, Data, 1);
 
             //test.printf("PDATA is: %d\r\n", Data[i]); //Data from chip
+
+            setProx = 10;
+
             test.printf("At %i cm?\r\n    ", setProx);
 
             if((Data[0] < (setProx + 1)) && (Data[0] > (setProx - 1))) { //Print if detected distance is close to set distance
