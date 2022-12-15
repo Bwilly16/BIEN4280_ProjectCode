@@ -120,7 +120,7 @@ void read_temperature(){
 
             setT = 40; //FOR TESTING ONLY
 
-            if(result == 8){ 
+            if(result == 4){ 
                 currentT = (1.8 * currentT) + 32;
                 test.printf("\r\nTemperature %i", currentT);
             }
@@ -128,7 +128,7 @@ void read_temperature(){
                 test.printf("\r\nTemperature %i", currentT);
             }
 
-            if(result == 8){
+            if(result == 4){
                 if(currentT >= (setT + 1)){ //If detected temp is higher than set temp, LED = red
                     greenLED = 1;
                     blueLED = 1;
@@ -146,7 +146,7 @@ void read_temperature(){
                 }
             }
 
-            else if(result == (6 || 7)){
+            else if(result == (3)){
                 if(currentT >= (setT + 0.5)){ //If detected temp is higher than set temp, LED = red
                     greenLED = 1;
                     blueLED = 1;
@@ -360,14 +360,17 @@ int main() {
     result = test.getc();
     result = result - 48;
 
-    if(result == 6){
+    if(result == 3 || 4){
         thread.start(read_temperature);
     }
-    else if(result == 4){
+    else if(result == 2){
         thread.start(proximity_sensor);
     }
     else if(result == 1){
         thread.start(color_sensor);
+    }
+    else{
+        test.printf("Error           ");
     }
 
     while (true) {
