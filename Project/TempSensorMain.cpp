@@ -118,13 +118,13 @@ void read_temperature(){
             currentT = (B5 + 8)/16;
             currentT = currentT/10;
 
-            setT = 40; //FOR TESTING ONLY
-
             if(result == 4){ 
+                setT = 70;
                 currentT = (1.8 * currentT) + 32;
                 test.printf("\r\nTemperature %i", currentT);
             }
             else{
+                setT = 40;
                 test.printf("\r\nTemperature %i", currentT);
             }
 
@@ -209,9 +209,13 @@ void proximity_sensor(){
             i2c.read(readRegProx, Data, 1);
 
             //test.printf("PDATA is: %d\r\n", Data[i]); //Data from chip
+            test.printf("At %i cm?\r\n    ", setProx);
 
             if((Data[0] < (setProx + 1)) && (Data[0] > (setProx - 1))) { //Print if detected distance is close to set distance
-                test.printf("%i cm reached\r\n", setProx);
+                greenLED = 0;
+            }
+            else{
+                greenLED = 1;
             }
         }
     }
@@ -246,9 +250,6 @@ void color_sensor() {
     colors.write(writeaddr, (const char*) data, 2, true);
 
     while(true) {        
-        //string command;
-        //scanf("%s", command);
-        //setT = PLACEHOLDER FOR COMMAND ENTERED; //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         //WAIT FOR COMMAND FROM USER TO ENTER RED VALUE
         //Reading red lower and upper bit
@@ -344,7 +345,7 @@ void color_sensor() {
         ClearCombo = ((MSB<<8)|LSB); //1024 Maximum
 
         for (i = j; i >= 0; i--) //If values are different lengths, may be an issue
-            test.printf("Detected hex value: #%i%i%i\r\n", redhexnum[i], greenhexnum[i], bluehexnum[i]);
+            test.printf("#%i%i%i\r\n    ", redhexnum[i], greenhexnum[i], bluehexnum[i]);
     }
 }
 
