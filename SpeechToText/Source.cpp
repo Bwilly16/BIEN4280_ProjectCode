@@ -72,7 +72,7 @@ int main()
     if (result->Reason == ResultReason::RecognizedSpeech)
     {
 
-        std::cout << "\n\rRECOGNIZED: Text = " << result->Text << std::endl; //Text.c_str() changed to Text
+        std::cout << "\n\rRECOGNIZED: Text = \n\r" << result->Text << std::endl; //Text.c_str() changed to Text
         //result->Text.copy(DataBuffer, sizeof(DataBuffer));
         
        // DataBuffer[0] = 0;
@@ -80,7 +80,6 @@ int main()
         if (result->Text.compare("What color am I looking at?") == 0) { // Command 1 
             DataBuffer[0] = '1'; // set command 1 to send 1 // no matter what this line happens
         }
-        
         else if(result->Text.compare("Set proximity to 10.") == 0) { // Command 5
             DataBuffer[0] = '2';
         }
