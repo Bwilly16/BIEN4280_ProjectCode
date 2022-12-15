@@ -232,10 +232,8 @@ void color_sensor() {
     uint16_t Red = 0, Blue = 0, Green = 0, Clear = 0;
     uint16_t MSB = 0, LSB = 0, RedCombo = 0, GreenCombo = 0, BlueCombo = 0, ClearCombo = 0;
     int redInt, greenInt, blueInt;
-    long redHex = 0, greenHex = 0, blueHex = 0;
     long remainder;
     int i = 0, j = 0;
-    char redhexnum[100] = {0}, greenhexnum[100] = {0}, bluehexnum[100] = {0};
 
     hold[0] = 0x00;
     data[0] = 0x92; //address of the ID register, output says 0xA8
@@ -268,17 +266,6 @@ void color_sensor() {
 
         RedCombo = ((MSB<<8)|LSB);
         redInt = RedCombo/4;
-        /*
-        j = 0;
-        
-        while(redInt != 0) { //TEST, REDINT MAY NEED TO BE A LONG INSTEAD OF AN INT
-            remainder = redInt % 16;
-            if (remainder < 10)
-                redhexnum[j++] = 48 + remainder;
-            else
-                redhexnum[j++] = 55 + remainder;
-            redInt = redInt / 16;
-        }*/
 
         //MyMessage.printf("Red Ouptut: %d\n\r", RedCombo);
 
@@ -296,17 +283,7 @@ void color_sensor() {
 
         GreenCombo = ((MSB<<8)|LSB);
         greenInt = GreenCombo/4;
-        /*
-        j = 0;
-        while(greenInt != 0) { //TEST, REDINT MAY NEED TO BE A LONG INSTEAD OF AN INT
-            remainder = greenInt % 16;
-            if (remainder < 10)
-                greenhexnum[j++] = 48 + remainder;
-            else
-                greenhexnum[j++] = 55 + remainder;
-            greenInt = redInt / 16;
-        }
-        */
+      
         //MyMessage.printf("Green Ouptut: %d\n\r", GreenCombo);
 
         //WAIT FOR COMMAND FROM USER TO ENTER BLUE VALUE
@@ -322,18 +299,8 @@ void color_sensor() {
         LSB = hold[0];
 
         BlueCombo = ((MSB<<8)|LSB);
-        blueHex = BlueCombo/4;
-        /*
-        j = 0;
-        while(blueInt != 0) { //TEST, REDINT MAY NEED TO BE A LONG INSTEAD OF AN INT
-            remainder = blueInt % 16;
-            if (remainder < 10)
-                bluehexnum[j++] = 48 + remainder;
-            else
-                bluehexnum[j++] = 55 + remainder;
-            blueInt = blueInt / 16;
-        }
-        */
+        blueInt = BlueCombo/4;
+    
         //MyMessage.printf("Blue Ouptut: %d\n\r", BlueCombo);
 
         //Reading clear lower and upper bit
@@ -349,8 +316,8 @@ void color_sensor() {
 
         ClearCombo = ((MSB<<8)|LSB); //1024 Maximum
 
-        for (i = j; i >= 0; i--) //If values are different lengths, may be an issue
-            test.printf("R%i G%i B%i\r\n    ", redInt, greenInt, blueHex);
+        for (i = j; i >= 0; i--)
+            test.printf("R%i G%i B%i\r\n    ", redInt, greenInt, blueInt);
     }
 }
 
