@@ -17,7 +17,7 @@ char DataBuffer[50];
 char DataRead[50];
 DWORD dwBytesToWrite = 1;
 DWORD dwBytesWritten;
-DWORD dwBytesToRead = 14; //change to whatever length we want to read from MBED
+DWORD dwBytesToRead = 16; //change to whatever length we want to read from MBED
                          // will wait forever if length we expect is longer than what MBED sends
 DWORD dwBytesRead;
 BOOL bErrorFlag = FALSE;
@@ -61,15 +61,10 @@ int main()
     printf("Speak into your microphone!\n\n\r");
     printf("-------------------------------\n\n\r");
     printf("SAY ONE OF THESE COMMANDS EXACTLY:\n");
-    printf("Activate color sensor.\n");
-    printf("Add color together.\n");
-    printf("Reset color value.\n");
-    printf("Activate proximity sensor.\n");
-    printf("Set proximity to 10.\n");
-    printf("Activate temperature sensor.\n");
-    printf("What's the temperature in Celsius?\n");
-    printf("What's the temperature in Fahrenheit?\n");
-    printf("Set reference temperature to 70.\n");
+    printf("What color am I looking at?\n"); // 1
+    printf("Set proximity to 10.\n");// 2
+    printf("What's the temperature in Celsius?\n"); // 3
+    printf("What's the temperature in Fahrenheit?\n"); // 4
 
     auto result = recognizer->RecognizeOnceAsync().get();
 
@@ -82,32 +77,18 @@ int main()
         
        // DataBuffer[0] = 0;
 
-        if (result->Text.compare("Activate color sensor.") == 0) { // Command 1 
+        if (result->Text.compare("What color am I looking at?") == 0) { // Command 1 
             DataBuffer[0] = '1'; // set command 1 to send 1 // no matter what this line happens
         }
-        else if(result->Text.compare("Add color together.") == 0) { // Command 2
+        
+        else if(result->Text.compare("Set proximity to 10.") == 0) { // Command 5
             DataBuffer[0] = '2';
         }
-        else if(result->Text.compare("Reset color value.") == 0) { // Command 3
+        else if(result->Text.compare("What's the temperature in Celsius?") == 0) { // Command 6 // possibly delete
             DataBuffer[0] = '3';
         }
-        else if(result->Text.compare("Activate proximity sensor.") == 0) { // Command 4 possibly delete
+        else if (result->Text.compare("What's the temperature in Fahrenheit?") == 0) { // Command 7
             DataBuffer[0] = '4';
-        }
-        else if(result->Text.compare("Set proximity to 10.") == 0) { // Command 5
-            DataBuffer[0] = '5';
-        }
-        else if(result->Text.compare("Activate temperature sensor.") == 0) { // Command 6 // possibly delete
-            DataBuffer[0] = '6';
-        }
-        else if(result->Text.compare("What's the temperature in Celsius?") == 0) { // Command 7
-            DataBuffer[0] = '7';
-        }
-        else if(result->Text.compare("What's the temperature in Fahrenheit?") == 0) { // Command 8
-            DataBuffer[0] = '8';
-        }
-        else if(result->Text.compare("Set reference temperature to 70.") == 0) { // Command 9
-            DataBuffer[0] = '9';
         }
         else {
             DataBuffer[0] = '0';
