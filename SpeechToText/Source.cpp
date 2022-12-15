@@ -164,7 +164,7 @@ int main()
         std::cout << "Successful read\n" << std::endl;
     }
 
-    std::cout <<"This is the temperature: \n" << DataRead << std::endl;
+    std::cout <<"This is the requested value: \n" << DataRead << std::endl;
     //std::cout << "This is the what is in the &dwBytesRead:" << dwBytesRead << std::endl;
 
    // std::cout << "this is the value of hComm" << std::endl;
