@@ -363,8 +363,9 @@ int main() {
 
     result = test.getc();
     result = result - 48;
+    test.printf("Result: %i      ", result);
 
-    if(result == (3 || 4)){
+    if(result == (3 | 4)){
         thread.start(read_temperature);
     }
     else if(result == 2){
