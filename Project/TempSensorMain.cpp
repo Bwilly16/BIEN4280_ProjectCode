@@ -21,7 +21,7 @@ USBSerial test;
 Thread thread, thread1, thread2;
 EventFlags PTEvent;
 I2C i2c(p31, p2); //(SDA, SCL)
-//I2C colors(I2C_SDA1, I2C_SCL1); //p0.14, p0.15
+I2C colors(I2C_SDA1, I2C_SCL1); //p0.14, p0.15
 DigitalOut port22(p22);
 DigitalOut pullupResistor(p32); //Pin 32 = P1_0
 DigitalOut redLED(LED2);
@@ -227,7 +227,7 @@ void proximity_sensor(){
         }
     }
 }
-/*
+
 void color_sensor() {
     //int waitTemp = PTEvent.wait_any(SETCOLOR); //Wait for event flag, MIGHT need to be before while loop
     uint8_t data[2];
@@ -409,9 +409,9 @@ int main() {
     else if(result == 4){
         thread.start(proximity_sensor);
     }
-   /* else if(result == 1){
+    else if(result == 1){
         thread.start(color_sensor);
-    }*/
+    }
 
     //interruptTicker.attach(&setEFlag, 1.0); //Check for command every 1 second, may need to slow down
 
