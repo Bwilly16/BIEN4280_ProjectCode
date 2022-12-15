@@ -350,7 +350,7 @@ void color_sensor() {
         ClearCombo = ((MSB<<8)|LSB); //1024 Maximum
 
         for (i = j; i >= 0; i--) //If values are different lengths, may be an issue
-            test.printf("R%i G%i B%i\r\n    ", redHex, greenHex, blueHex);
+            test.printf("R%i G%i B%i\r\n    ", redInt, greenInt, blueHex);
     }
 }
 
