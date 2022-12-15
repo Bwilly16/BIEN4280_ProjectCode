@@ -316,8 +316,27 @@ void color_sensor() {
 
         ClearCombo = ((MSB<<8)|LSB); //1024 Maximum
 
-        for (i = j; i >= 0; i--)
-            test.printf("R%i G%i B%i\r\n    ", redInt, greenInt, blueInt);
+        //for (i = j; i >= 0; i--)
+            //test.printf("R%i G%i B%i\r\n", redInt, greenInt, blueInt);
+
+        if((redInt > 300) && (blueInt < 100) && (greenInt < 100)) { 
+           test.printf("Red\n\r              ");
+        }
+        else if((blueInt > greenInt) && (blueInt > redInt) && (greenInt > redInt)) {
+             test.printf("Blue\n\r           ");
+        }
+        else if((greenInt > blueInt) && (greenInt > redInt)) {
+            test.printf("Green\n\r            ");
+        }
+        else if((blueInt > greenInt) && (redInt > greenInt)) { 
+         test.printf("Purple\n\r            ");
+        }
+        else if((redInt > blueInt) && (redInt >= greenInt) && (greenInt > blueInt)) { //((RedOut == 1024) | (RedOut == 768)) && (BlueOut == 256) && (GreenOut == 768))//
+            test.printf("Yellow\n\r            ");
+        }
+        else if((redInt > blueInt) && (redInt > greenInt) && (blueInt < greenInt)) {   //((RedOut == 768) && (BlueOut == 256) && (GreenOut == 256))  
+            test.printf("Orange\n\r             ");
+       }
     }
 }
 
