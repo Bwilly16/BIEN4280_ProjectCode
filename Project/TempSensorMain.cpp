@@ -4,7 +4,7 @@
 
 #define LEDDIR (uint32_t*) 0x50000514 
 #define SETTEMPERATURE (1UL << 8)
-//#define SETPROXIMITY (1UL << 4)
+#define SETPROXIMITY (1UL << 4)
 //#define SETCOLOR (1UL << 2)
 
 unsigned int readReg = 0xEF; //Read and write registers for temperature sensor
@@ -177,7 +177,7 @@ void read_temperature(){
         }
     }
 }
-/*
+
 void proximity_sensor(){
     //int waitTemp = PTEvent.wait_any(SETPROXIMITY); //Wait for event flag, MIGHT need to be before while loop
     char Data[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //char == uint8
@@ -227,7 +227,7 @@ void proximity_sensor(){
         }
     }
 }
-
+/*
 void color_sensor() {
     //int waitTemp = PTEvent.wait_any(SETCOLOR); //Wait for event flag, MIGHT need to be before while loop
     uint8_t data[2];
@@ -406,10 +406,10 @@ int main() {
         thread.start(read_temperature);
         //test.printf("starting read_temp\n\r");
     }
-   /* else if(result == 4){
+    else if(result == 4){
         thread.start(proximity_sensor);
     }
-    else if(result == 1){
+   /* else if(result == 1){
         thread.start(color_sensor);
     }*/
 
