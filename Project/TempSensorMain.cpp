@@ -33,17 +33,12 @@ uint16_t result;
 
 void read_temperature(){
     //test.printf("in read_temp now");
-    //int waitTemp = PTEvent.wait_any(SETTEMPERATURE); //Wait for event flag
     char temperatureData[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //char == uint8
     unsigned short AC5, AC6; //Initializing constants and variables
     short MC, MD;
     long X1 = 0, X2 = 0, B5 = 0, currentT = 0, setT = 0;
     uint16_t MSB, LSB;
     int i = 0;
-
-    //string command;
-    //scanf("%s", command);
-    //setT = PLACEHOLDER FOR COMMAND ENTERED; //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     temperatureData[0] = 0xD0;
     i2c.write(writeReg, temperatureData, 1, true); //Send 0xD0 = 208
@@ -52,7 +47,6 @@ void read_temperature(){
     //test.printf("1: Array[0] = %i \r\n\r\n", temperatureData[0]); //Check for signal from sensor
 
     if(temperatureData[0] == 85){
-        //test.printf("\n\r Reading temperature sensor correctly");
         //AC5
         temperatureData[0] = 0xB2;
         i2c.write(writeReg, temperatureData, 1, true);
@@ -126,20 +120,15 @@ void read_temperature(){
 
             setT = 40; //FOR TESTING ONLY
 
-            //test.printf("Reading temperature: %i degrees C\r\n\r\n", currentT);
-            test.printf("\r\nTemperature %i", currentT);
-
-            /* //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            scanf("%s", command);
-            
-            if(FARENHEIT COMMAND == TRUE){ 
-                T = (1.8 * T) + 32;
-                test.printf("Reading temperature: %i degrees F\r\n\r\n", T);
+            if(result == 8){ 
+                currentT = (1.8 * currentT) + 32;
+                test.printf("\r\nTemperature %i", currentT);
             }
             else{
-                test.printf("Reading temperature: %i degrees C\r\n\r\n", T);
+                test.printf("\r\nTemperature %i", currentT);
             }
-            if(FARENEIT COMMAND == TRUE){
+
+            if(result == 8){
                 if(currentT >= (setT + 1)){ //If detected temp is higher than set temp, LED = red
                     greenLED = 1;
                     blueLED = 1;
@@ -156,7 +145,8 @@ void read_temperature(){
                     greenLED = 0;
                 }
             }
-            else if(CELCIUS COMMAND == TRUE){*/
+
+            else if(result == (6 || 7)){
                 if(currentT >= (setT + 0.5)){ //If detected temp is higher than set temp, LED = red
                     greenLED = 1;
                     blueLED = 1;
@@ -171,15 +161,14 @@ void read_temperature(){
                     redLED = 1;
                     blueLED = 1;
                     greenLED = 0;
-                }/*
+                }
             }
-            */
         }
     }
 }
 
 void proximity_sensor(){
-    //int waitTemp = PTEvent.wait_any(SETPROXIMITY); //Wait for event flag, MIGHT need to be before while loop
+
     char Data[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //char == uint8
     int i = 0;
     long setProx = 0; //Set to result from speech to text
@@ -229,7 +218,7 @@ void proximity_sensor(){
 }
 
 void color_sensor() {
-    //int waitTemp = PTEvent.wait_any(SETCOLOR); //Wait for event flag, MIGHT need to be before while loop
+
     uint8_t data[2];
     char hold[1];
     char test1, test2;
@@ -358,37 +347,8 @@ void color_sensor() {
             test.printf("Detected hex value: #%i%i%i\r\n", redhexnum[i], greenhexnum[i], bluehexnum[i]);
     }
 }
-/*
-void setEFlag(){ //Send event flag to read_temperature
-    //test.printf("In setFlag");
-    if(result == 6){
-        PTEvent.set(SETTEMPERATURE);
-        test.printf("In set temp   ");
-        /*test.printf("")
-        result = test.getc();
-        result = result - 48;
-        test.printf("Set temperature: %i", result);
-    }
-    else if(result == 4){
-        PTEvent.set(SETPROXIMITY);
-    }
-    else if(result == 1){
-        PTEvent.set(SETCOLOR);
-    }
-    else{
-        test.printf("Please activate a valid sensor\r\n\n");
-        test.printf("VALID COMMANDS:\r\n");
-        test.printf("'Activate temperature sensor'\r\n'Activate proximity sensor'\r\n'Activate color sensor'\r\n");
-    }
-}
-*/
+
 int main() {
-   /* thread.start(read_temperature);
-    thread1.start(proximity_sensor);
-    thread2.start(color_sensor);*/
-	//*LEDDIR = *LEDDIR | (1 << 6);
-    //*LEDDIR = *LEDDIR | (1 << 16);
-    //*LEDDIR = *LEDDIR | (1 << 24);
 
     redLED = 1; //Turns LED off when first setting bits, causes a short blink
     blueLED = 1;
@@ -399,12 +359,9 @@ int main() {
 
     result = test.getc();
     result = result - 48;
-    //result = 6;
-    //test.printf("This is test %i\n\r", result);
 
     if(result == 6){
         thread.start(read_temperature);
-        //test.printf("starting read_temp\n\r");
     }
     else if(result == 4){
         thread.start(proximity_sensor);
@@ -412,8 +369,6 @@ int main() {
     else if(result == 1){
         thread.start(color_sensor);
     }
-
-    //interruptTicker.attach(&setEFlag, 1.0); //Check for command every 1 second, may need to slow down
 
     while (true) {
         thread_sleep_for(1000);
