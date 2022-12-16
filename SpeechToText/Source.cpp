@@ -17,7 +17,7 @@ char DataBuffer[50];
 char DataRead[50];
 DWORD dwBytesToWrite = 1;
 DWORD dwBytesWritten;
-DWORD dwBytesToRead = 16; //change to whatever length we want to read from MBED
+DWORD dwBytesToRead = 18; //change to whatever length we want to read from MBED
                          // will wait forever if length we expect is longer than what MBED sends
 DWORD dwBytesRead;
 BOOL bErrorFlag = FALSE;
