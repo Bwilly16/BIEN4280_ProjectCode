@@ -168,11 +168,12 @@ void read_temperature(){
 }
 
 void proximity_sensor(){
-
+  
+   
     char Data[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //char == uint8
     int i = 0;
     long setProx = 0; //Set to result from speech to text
-
+ 
     //setProx = result; //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //string command;
     //scanf("%s", command);
@@ -181,11 +182,11 @@ void proximity_sensor(){
     thread_sleep_for(10);
 
     Data[0] = 0x92; //146
-    i2c.write(writeRegProx, Data, 1, true); //Check ID
-    i2c.read(readRegProx, Data, 1); //Expect a 0xAB = 171 back
-
+   
+   colors.write(writeRegProx, Data, 1, true); //Check ID
+   colors.read(readRegProx, Data, 1); //Expect a 0xAB = 171 back
     //test.printf("The sensor ID is: %d\r\n\r\n", Data[0]); //Check for connection
-
+    //test.printf("%i, %i          ", testy, testy2);
     if(Data[0] == 171){
             Data[0] = 0x90; //Increasing distance
             Data[1] = 0x30;
@@ -209,10 +210,11 @@ void proximity_sensor(){
             i2c.read(readRegProx, Data, 1);
 
             //test.printf("PDATA is: %d\r\n", Data[i]); //Data from chip
-
+            
             setProx = 10;
+            
 
-            test.printf("At %i cm?\r\n    ", setProx);
+            
 
             if((Data[0] < (setProx + 1)) && (Data[0] > (setProx - 1))) { //Print if detected distance is close to set distance
                 greenLED = 0;
@@ -220,6 +222,7 @@ void proximity_sensor(){
             else{
                 greenLED = 1;
             }
+            test.printf("At %i cm?\r\n      ", setProx);
         }
     }
 }
@@ -350,18 +353,22 @@ int main() {
 
     result = test.getc();
     result = result - 48;
+    //test.printf("Result: %i",result);
 
-    if(result == (3 | 4)){
-        thread.start(read_temperature);
-    }
-    else if(result == 2){
-        thread.start(proximity_sensor);
-    }
-    else if(result == 1){
+    if(result == 1){
         thread.start(color_sensor);
     }
+    else if(result == 2){
+        thread.start(proximity_sensor);  
+    }
+    else if(result == 3){
+        thread.start(read_temperature);
+    }
+    else if(result == 4){
+        thread.start(read_temperature);
+    }
     else{
-        test.printf("Error           ");
+        test.printf("Error number    ");
     }
 
     while (true) {
