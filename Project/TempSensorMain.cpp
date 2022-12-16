@@ -168,17 +168,11 @@ void read_temperature(){
 }
 
 void proximity_sensor(){
-  
    
     char Data[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //char == uint8
     int i = 0;
     long setProx = 0; //Set to result from speech to text
  
-    //setProx = result; //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    //string command;
-    //scanf("%s", command);
-    //setT = PLACEHOLDER FOR COMMAND ENTERED; //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
     thread_sleep_for(10);
 
     Data[0] = 0x92; //146
@@ -190,33 +184,30 @@ void proximity_sensor(){
     if(Data[0] == 171){
             Data[0] = 0x90; //Increasing distance
             Data[1] = 0x30;
-            i2c.write(writeRegProx, (const char *)Data, 2);
+            colors.write(writeRegProx, (const char *)Data, 2);
 
             Data[0] = 0x8F; //Increasing gain = improves readings of distant signals
             Data[1] = 0x0C;
-            i2c.write(writeRegProx, (const char *)Data, 2);
+            colors.write(writeRegProx, (const char *)Data, 2);
 
         while(true){
             thread_sleep_for(50); //5 millisecond buffer
 
             Data[0] = 0x80; //Send start signal
             Data[1] = 0x25;
-            i2c.write(writeRegProx, (const char *)Data, 2);
+            colors.write(writeRegProx, (const char *)Data, 2);
 
             thread_sleep_for(15); //Additional buffer time
 
             Data[0] = 0x9C; //Read data obtained
-            i2c.write(writeRegProx, (const char *)Data, 1, true);
-            i2c.read(readRegProx, Data, 1);
+            colors.write(writeRegProx, (const char *)Data, 1, true);
+            colors.read(readRegProx, Data, 1);
 
             //test.printf("PDATA is: %d\r\n", Data[i]); //Data from chip
-            
-            setProx = 10;
-            
 
-            
+            setProx = 50; //This = 10 cm
 
-            if((Data[0] < (setProx + 1)) && (Data[0] > (setProx - 1))) { //Print if detected distance is close to set distance
+            if((Data[0] < 60) && (Data[0] > 40)) { //Print if detected distance is close to set distance
                 greenLED = 0;
             }
             else{
@@ -354,7 +345,7 @@ int main() {
     result = test.getc();
     result = result - 48;
     //test.printf("Result: %i",result);
-
+    
     if(result == 1){
         thread.start(color_sensor);
     }
